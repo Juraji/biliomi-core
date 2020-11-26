@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import nl.juraji.biliomi.domain.EntityId
 import nl.juraji.biliomi.utils.serialization.keySerializer
 import nl.juraji.biliomi.utils.serialization.serializer
 import nl.juraji.biliomi.utils.serialization.simpleJacksonModule
-import nl.juraji.reactive.albums.domain.EntityId
 import org.axonframework.serialization.Serializer
 import org.axonframework.serialization.json.JacksonSerializer
 import org.springframework.beans.factory.config.ConfigurableBeanFactory

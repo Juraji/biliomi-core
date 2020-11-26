@@ -1,4 +1,4 @@
-package nl.juraji.reactive.albums.domain
+package nl.juraji.biliomi.domain
 
 import java.io.Serializable
 
