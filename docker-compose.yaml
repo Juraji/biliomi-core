@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  biliomi-db:
+    image: mariadb
+    command: --max-allowed-packet=4G
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./src/test/docker:/docker-entrypoint-initdb.d
+      - biliomi_db_volume:/var/lib/mysql
+
+volumes:
+  biliomi_db_volume:
