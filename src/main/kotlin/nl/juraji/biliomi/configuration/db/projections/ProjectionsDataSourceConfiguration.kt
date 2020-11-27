@@ -19,7 +19,7 @@ import org.springframework.r2dbc.core.DatabaseClient
 @Configuration
 @EnableR2dbcRepositories(
         entityOperationsRef = "projectionsEntityTemplate",
-        basePackages = ["nl.juraji.biliomi.projections.repositories"]
+        basePackages = ["nl.juraji.biliomi.projections.repositories"],
 )
 class ProjectionsDataSourceConfiguration(
         multiTenancyConfiguration: MultiTenancyConfiguration,

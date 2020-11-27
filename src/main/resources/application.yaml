@@ -5,42 +5,54 @@ spring:
       ddl-auto: none
   flyway:
     enabled: false
-  security:
-    user:
-      name: admin
-      password: secret
+  webflux:
+    base-path: "/api"
+
+db:
+  host: "localhost"
+  port: 3306
+  username: root
+  password: secret
 
 multi-tenancy:
   tenants:
     - tenantId: axon
       datasource:
-        url: "jdbc:mysql://localhost:3306/axon"
-        username: root
-        password: secret
+        url: "jdbc:mysql://${db.host}:${db.port}/axon"
+        username: ${db.username}
+        password: ${db.password}
       flyway:
-        url: ${multi-tenancy.tenants[0].datasource.url}
-        user: ${multi-tenancy.tenants[0].datasource.username}
-        password: ${multi-tenancy.tenants[0].datasource.password}
+        url: "jdbc:mysql://${db.host}:${db.port}/axon"
+        user: ${db.username}
+        password: ${db.password}
         enabled: true
-        baseline-on-migrate: true
         locations:
           - "classpath:/db/migration/axon"
     - tenantId: projections
       datasource:
-        url: "r2dbc:mysql://localhost:3306/projections"
-        username: root
-        password: secret
+        url: "r2dbc:mysql://${db.host}:${db.port}/projections"
+        username: ${db.username}
+        password: ${db.password}
       flyway:
-        url: "jdbc:mysql://localhost:3306/projections"
-        user: ${multi-tenancy.tenants[1].datasource.username}
-        password: ${multi-tenancy.tenants[1].datasource.password}
-        enabled: false
-        baseline-on-migrate: true
+        url: "jdbc:mysql://${db.host}:${db.port}/projections"
+        user: ${db.username}
+        password: ${db.password}
+        enabled: true
         locations:
           - "classpath:/db/migration/projections"
+
 
 axon:
   serializer:
     general: jackson
     events: jackson
     messages: jackson
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - mappings

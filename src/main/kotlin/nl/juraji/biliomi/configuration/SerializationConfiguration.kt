@@ -8,9 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import nl.juraji.biliomi.domain.EntityId
-import nl.juraji.biliomi.utils.serialization.keySerializer
-import nl.juraji.biliomi.utils.serialization.serializer
-import nl.juraji.biliomi.utils.serialization.simpleJacksonModule
+import nl.juraji.biliomi.domain.user.UserId
+import nl.juraji.biliomi.utils.serialization.*
 import org.axonframework.serialization.Serializer
 import org.axonframework.serialization.json.JacksonSerializer
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -29,8 +28,8 @@ class SerializationConfiguration {
             serializer(EntityId::class) { value, _ -> writeString(value.identifier) }
             keySerializer(EntityId::class) { value, _ -> writeFieldName(value.identifier) }
 
-//                                deserializer(PictureId::class) { PictureId(valueAsString) }
-//                                keyDeserializer(PictureId::class) { value -> PictureId(value) }
+            deserializer(UserId::class) { UserId(valueAsString) }
+            keyDeserializer(UserId::class) { value -> UserId(value) }
         }
 
         return Jackson2ObjectMapperBuilder()

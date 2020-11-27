@@ -18,6 +18,7 @@ repositories {
 
 dependencies {
     val axonVersion = "4.4.5"
+    val axonReactorVersion = "4.4.2"
     val mockkVersion = "1.10.2"
     val springMockkVersion = "3.0.0"
     val testcontainersVersion = "1.15.0"
@@ -31,6 +32,7 @@ dependencies {
     implementation("org.axonframework:axon-spring-boot-starter:$axonVersion") {
         exclude("org.axonframework", "axon-server-connector")
     }
+    implementation("org.axonframework.extensions.reactor:axon-reactor-spring-boot-starter:$axonReactorVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("io.projectreactor.addons:reactor-extra")

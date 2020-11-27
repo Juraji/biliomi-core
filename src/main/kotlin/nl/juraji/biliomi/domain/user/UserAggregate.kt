@@ -33,30 +33,38 @@ class UserAggregate() {
     }
 
     @CommandHandler
-    fun handle(cmd: AddPointsCommand) {
+    fun handle(cmd: AddPointsCommand): Long {
         Validate.isTrue(cmd.amount > 0) { "Amount to add should be a positive number" }
+
+        val newBalance = pointBalance + cmd.amount
 
         AggregateLifecycle.apply(
                 PointBalanceUpdatedEvent(
                         userId = userId,
                         previousBalance = pointBalance,
-                        newBalance = pointBalance + cmd.amount
+                        newBalance = newBalance
                 )
         )
+
+        return newBalance
     }
 
     @CommandHandler
-    fun handle(cmd: SubtractPointsCommand) {
+    fun handle(cmd: SubtractPointsCommand): Long {
         Validate.isTrue(cmd.amount > 0) { "Amount to subtract should be a positive number" }
-        Validate.isTrue(pointBalance >= cmd.amount) { "Not able to subtract ${cmd.amount} when point balance is $pointBalance" }
+        Validate.isTrue(pointBalance >= cmd.amount) { "Insufficient point balance: $pointBalance (-${cmd.amount})" }
+
+        val newBalance = pointBalance - cmd.amount
 
         AggregateLifecycle.apply(
                 PointBalanceUpdatedEvent(
                         userId = userId,
                         previousBalance = pointBalance,
-                        newBalance = pointBalance - cmd.amount
+                        newBalance = newBalance
                 )
         )
+
+        return newBalance
     }
 
     @EventSourcingHandler

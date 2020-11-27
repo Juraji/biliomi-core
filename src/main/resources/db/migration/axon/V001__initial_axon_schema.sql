@@ -1,9 +1,6 @@
-create sequence hibernate_sequence start with 1 increment by 1;
-create sequence domain_event_entry_sequence start with 1 increment by 1;
-
 create table AssociationValueEntry
 (
-    id               bigint       not null,
+    id               bigint       not null auto_increment,
     associationKey   varchar(255) not null,
     associationValue varchar(255),
     sagaId           varchar(255) not null,
@@ -13,7 +10,7 @@ create table AssociationValueEntry
 
 create table DomainEventEntry
 (
-    globalIndex         bigint       not null,
+    globalIndex         bigint       not null auto_increment,
     eventIdentifier     varchar(255) not null,
     metaData            blob,
     payload             blob         not null,
