@@ -1,34 +1,31 @@
 package nl.juraji.biliomi.api.users
 
-import nl.juraji.biliomi.domain.user.UserId
-import nl.juraji.biliomi.domain.user.commands.AddPointsCommand
-import nl.juraji.biliomi.domain.user.commands.CreateUserCommand
-import nl.juraji.biliomi.domain.user.commands.SubtractPointsCommand
-import nl.juraji.biliomi.projections.UserProjection
-import nl.juraji.biliomi.projections.repositories.UserRepository
-import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
+import nl.juraji.biliomi.security.UserDetailsManager
+import nl.juraji.biliomi.security.UserPrincipal
+import nl.juraji.biliomi.security.repositories.UserPrincipalRepository
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
 class UsersService(
-        private val commandGateway: ReactorCommandGateway,
-        private val userRepository: UserRepository,
+        private val userPrincipalRepository: UserPrincipalRepository,
+        private val userDetailsManager: UserDetailsManager,
 ) {
 
-    fun findUsers(): Flux<UserProjection> = userRepository
+    fun findUsers(): Flux<UserPrincipal> = userPrincipalRepository
             .findAll()
+            .map(UserPrincipal::eraseCredentialsK)
 
-    fun findUser(userId: UserId): Mono<UserProjection> = userRepository
-            .findById(userId.identifier)
+    fun findUser(userId: String): Mono<UserPrincipal> = userPrincipalRepository
+            .findById(userId)
+            .map(UserPrincipal::eraseCredentialsK)
 
-    fun createUser(username: String): Mono<UserId> = commandGateway
-            .send(CreateUserCommand(userId = UserId(), username = username))
-
-    fun addPoints(userId: UserId, amount: Long): Mono<Long> = commandGateway
-            .send(AddPointsCommand(userId = userId, amount = amount))
-
-    fun subtractPoints(userId: UserId, amount: Long): Mono<Long> = commandGateway
-            .send(SubtractPointsCommand(userId = userId, amount = amount))
+    fun createUser(username: String, password: String, roles: Set<String>): Mono<UserPrincipal> =
+            Mono.just(userDetailsManager.createUser(
+                    username = username,
+                    password = password,
+                    authorities = roles.map { GrantedAuthority { it } }.toSet()
+            ))
 }

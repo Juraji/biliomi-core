@@ -17,7 +17,7 @@ import javax.sql.DataSource
 
 @Configuration
 @EnableTransactionManagement
-class EventSourcingJpaConfiguration(
+class EventSourcingDataSourceConfiguration(
         multiTenancyConfiguration: MultiTenancyConfiguration,
 ) {
     private val tenant: Tenant = multiTenancyConfiguration.findTenant("axon")
@@ -31,7 +31,7 @@ class EventSourcingJpaConfiguration(
 
     @Primary
     @Bean(name = ["entityManagerFactory"])
-    fun projectionsEntityManagerFactory(
+    fun entityManagerFactory(
             builder: EntityManagerFactoryBuilder,
             @Qualifier("dataSource") dataSource: DataSource,
     ): LocalContainerEntityManagerFactoryBean = builder

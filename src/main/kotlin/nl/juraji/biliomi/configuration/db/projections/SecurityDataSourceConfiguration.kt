@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import reactor.core.scheduler.Scheduler
 import reactor.core.scheduler.Schedulers
 import java.util.concurrent.ExecutorService
@@ -19,48 +20,48 @@ import java.util.concurrent.Executors
 import javax.persistence.EntityManagerFactory
 import javax.sql.DataSource
 
-
 @Configuration
+@EnableTransactionManagement
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "projectionsEntityManagerFactory",
-        transactionManagerRef = "projectionsTransactionManager",
-        basePackages = ["nl.juraji.biliomi.projections.repositories"]
+        entityManagerFactoryRef = "securityEntityManagerFactory",
+        transactionManagerRef = "securityTransactionManager",
+        basePackages = ["nl.juraji.biliomi.security.repositories"]
 )
-class ProjectionsDataSourceConfiguration(
+class SecurityDataSourceConfiguration(
         multiTenancyConfiguration: MultiTenancyConfiguration,
 ) {
-    private val tenant: Tenant = multiTenancyConfiguration.findTenant("projections")
+    private val tenant: Tenant = multiTenancyConfiguration.findTenant("security")
 
-    @Bean(name = ["projectionsDataSource"])
+    @Bean(name = ["securityDataSource"])
     fun dataSource(): DataSource = tenant.datasource
             .initializeDataSourceBuilder()
             .type(HikariDataSource::class.java)
             .build()
 
-    @Bean(name = ["projectionsEntityManagerFactory"])
-    fun projectionsEntityManagerFactory(
+    @Bean(name = ["securityEntityManagerFactory"])
+    fun securityEntityManagerFactory(
             builder: EntityManagerFactoryBuilder,
-            @Qualifier("projectionsDataSource") dataSource: DataSource,
+            @Qualifier("securityDataSource") dataSource: DataSource,
     ): LocalContainerEntityManagerFactoryBean = builder
             .dataSource(dataSource)
             .packages(
-                    "nl.juraji.biliomi.projections"
+                    "nl.juraji.biliomi.security"
             )
             .persistenceUnit("eventsourcing")
             .build()
 
-    @Bean("projectionsTransactionManager")
-    fun projectionsTransactionManager(
-            @Qualifier("projectionsEntityManagerFactory") entityManagerFactory: EntityManagerFactory,
+    @Bean("securityTransactionManager")
+    fun securityTransactionManager(
+            @Qualifier("securityEntityManagerFactory") entityManagerFactory: EntityManagerFactory,
     ): PlatformTransactionManager = JpaTransactionManager(entityManagerFactory)
 
-    @Bean(name = ["projectionsScheduler"])
+    @Bean(name = ["securityScheduler"])
     fun jdbcScheduler(
-            @Qualifier("projectionsDataSource") dataSource: DataSource,
+            @Qualifier("securityDataSource") dataSource: DataSource,
     ): Scheduler {
         val pool: ExecutorService = Executors.newFixedThreadPool(
                 (dataSource as HikariDataSource).maximumPoolSize,
-                NumberedThreadFactory("projections-scheduler")
+                NumberedThreadFactory("security-scheduler")
         )
         return Schedulers.fromExecutor(pool)
     }

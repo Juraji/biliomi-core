@@ -5,6 +5,7 @@ import org.flywaydb.core.Flyway
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.flyway.FlywayProperties
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
 
@@ -15,17 +16,13 @@ class MultiTenantFlywayMigrations(
 ) : InitializingBean {
 
     override fun afterPropertiesSet() {
-        runOnAllDataSources()
-    }
-
-    private fun runOnAllDataSources() {
         val tenants = multiTenancyConfiguration.tenants
         logger.info("Running Flyway migrations for ${tenants.size} tenants...")
 
         tenants
                 .filter { it.flyway != null && it.flyway.isEnabled }
                 .forEach { tenant ->
-                    val flyway: Flyway = createFlywayMigrator(tenant.flyway!!)
+                    val flyway: Flyway = createFlywayMigrator(tenant.flyway!!, tenant.datasource)
 
                     if (taskExecutor != null) {
                         taskExecutor.execute {
@@ -39,11 +36,20 @@ class MultiTenantFlywayMigrations(
                 }
     }
 
-    private fun createFlywayMigrator(flywayProperties: FlywayProperties): Flyway = Flyway.configure()
-            .baselineOnMigrate(flywayProperties.isBaselineOnMigrate)
-            .dataSource(flywayProperties.url, flywayProperties.user, flywayProperties.password)
-            .locations(*flywayProperties.locations.toTypedArray())
-            .load()
+    private fun createFlywayMigrator(
+            flywayProperties: FlywayProperties,
+            datasource: DataSourceProperties,
+    ): Flyway {
+        if (flywayProperties.url.isNullOrEmpty()) flywayProperties.url = datasource.url
+        if (flywayProperties.user.isNullOrEmpty()) flywayProperties.user = datasource.username
+        if (flywayProperties.password.isNullOrEmpty()) flywayProperties.password = datasource.password
+
+        return Flyway.configure()
+                .baselineOnMigrate(flywayProperties.isBaselineOnMigrate)
+                .dataSource(flywayProperties.url, flywayProperties.user, flywayProperties.password)
+                .locations(*flywayProperties.locations.toTypedArray())
+                .load()
+    }
 
     companion object : LoggerCompanion(MultiTenantFlywayMigrations::class)
 }

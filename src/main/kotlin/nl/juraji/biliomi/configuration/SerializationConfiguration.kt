@@ -7,9 +7,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import nl.juraji.biliomi.domain.EntityId
-import nl.juraji.biliomi.domain.user.UserId
-import nl.juraji.biliomi.utils.serialization.*
 import org.axonframework.serialization.Serializer
 import org.axonframework.serialization.json.JacksonSerializer
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -24,21 +21,12 @@ class SerializationConfiguration {
     @Primary
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
-        val entityIdModule = simpleJacksonModule {
-            serializer(EntityId::class) { value, _ -> writeString(value.identifier) }
-            keySerializer(EntityId::class) { value, _ -> writeFieldName(value.identifier) }
-
-            deserializer(UserId::class) { UserId(valueAsString) }
-            keyDeserializer(UserId::class) { value -> UserId(value) }
-        }
-
         return Jackson2ObjectMapperBuilder()
                 .propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
                 .modules(
                         JavaTimeModule(),
                         KotlinModule(),
-                        entityIdModule
                 )
                 .featuresToEnable(
                         MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS,

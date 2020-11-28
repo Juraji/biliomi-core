@@ -21,8 +21,15 @@ object Validate {
         if (!predicate) validation.invoke(this)
     }
 
-    fun fail(message: () -> String): Nothing =
-            throw ValidationException(message())
+    fun isNotBlank(value: String?, message: () -> String) {
+        if (value.isNullOrBlank()) fail(message)
+    }
+
+    fun isNotEmpty(value: Collection<Any>, message: () -> String) {
+        if (value.isEmpty()) fail(message)
+    }
+
+    fun fail(message: () -> String): Nothing = throw ValidationException(message())
 }
 
 object ValidateAsync {
@@ -43,6 +50,11 @@ object ValidateAsync {
 
     fun <T : Any> isNotNull(value: Mono<T>, message: () -> String): Mono<Boolean> =
             value.flatMap { success() }.switchIfEmpty { fail(message) }
+
+    fun isNotBlank(value: Mono<CharSequence>, message: () -> String) = value
+            .filter(CharSequence::isNotBlank)
+            .flatMap { success() }
+            .switchIfEmpty { fail(message) }
 
     fun ignoreWhen(predicate: Boolean, validation: ValidateAsync.() -> Mono<Boolean>): Mono<Boolean> =
             if (predicate) success() else validation.invoke(this)
