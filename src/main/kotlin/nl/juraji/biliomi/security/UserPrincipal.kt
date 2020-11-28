@@ -1,6 +1,5 @@
 package nl.juraji.biliomi.security
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.security.core.CredentialsContainer
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -9,18 +8,19 @@ import javax.persistence.*
 @Entity
 data class UserPrincipal(
         @Id val userId: String,
-        @JsonIgnore @ManyToMany val userGroups: Set<UserGroup> = emptySet(),
+        @ManyToMany(fetch = FetchType.EAGER)
+        val authorityGroups: Set<AuthorityGroup> = emptySet(),
 
-        private val username: String,
+        @Column(unique = true) private val username: String,
         private var password: String,
         private val accountNonExpired: Boolean = true,
         private val accountNonLocked: Boolean = true,
         private val credentialsNonExpired: Boolean = true,
         private val enabled: Boolean = true,
-        @Convert(converter = GrantedAuthorityConverter::class)
-        @ElementCollection(fetch = FetchType.EAGER) private val authorities: Set<GrantedAuthority> = emptySet(),
 ) : UserDetails, CredentialsContainer {
-    override fun getAuthorities(): Collection<GrantedAuthority> = authorities
+    override fun getAuthorities(): Collection<GrantedAuthority> = authorityGroups
+            .flatMap(AuthorityGroup::authorities)
+            .map { GrantedAuthority { it } }
     override fun getPassword(): String = password
     override fun getUsername(): String = username
     override fun isAccountNonExpired(): Boolean = accountNonExpired

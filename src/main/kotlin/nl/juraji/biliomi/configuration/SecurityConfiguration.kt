@@ -9,7 +9,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder
@@ -53,15 +52,12 @@ class InitialUsersConfiguration(
         if (!userExists(ADMIN_USERNAME)) {
             val password = UUID.randomUUID().toString()
 
-            createUser(
-                    username = ADMIN_USERNAME,
-                    password = password,
-                    authorities = ADMIN_AUTHORITIES
-            )
+            createUser(ADMIN_USERNAME, password)
+            addUserToGroup(ADMIN_USERNAME, ADMIN_GROUP)
 
             logger.info("""
                 
-                Created initial admin user:
+                Created initial administrator user:
                 Username: $ADMIN_USERNAME
                 Password: $password
                 
@@ -72,8 +68,8 @@ class InitialUsersConfiguration(
     }
 
     companion object : LoggerCompanion(InitialUsersConfiguration::class) {
-        val ADMIN_USERNAME: String by lazy { "admin" }
-        val ADMIN_AUTHORITIES: Set<GrantedAuthority> by lazy { setOf(GrantedAuthority { "ROLE_ADMIN" }) }
+        const val ADMIN_USERNAME: String = "admin"
+        const val ADMIN_GROUP: String = "Administrators"
     }
 }
 

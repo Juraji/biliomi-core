@@ -46,7 +46,7 @@ class ProjectionsDataSourceConfiguration(
             .packages(
                     "nl.juraji.biliomi.projections"
             )
-            .persistenceUnit("eventsourcing")
+            .persistenceUnit(tenant.tenantId)
             .build()
 
     @Bean("projectionsTransactionManager")

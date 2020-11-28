@@ -41,7 +41,7 @@ class EventSourcingDataSourceConfiguration(
                     "org.axonframework.modelling.saga.repository.jpa",
                     "org.axonframework.eventsourcing.eventstore.jpa"
             )
-            .persistenceUnit("eventsourcing")
+            .persistenceUnit("axon")
             .build()
 
     @Primary

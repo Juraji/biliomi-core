@@ -47,7 +47,7 @@ class SecurityDataSourceConfiguration(
             .packages(
                     "nl.juraji.biliomi.security"
             )
-            .persistenceUnit("eventsourcing")
+            .persistenceUnit("security")
             .build()
 
     @Bean("securityTransactionManager")

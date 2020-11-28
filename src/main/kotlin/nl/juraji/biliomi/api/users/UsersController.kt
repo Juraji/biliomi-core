@@ -27,6 +27,5 @@ class UsersController(
     ): Mono<UserPrincipal> = usersService.createUser(
             userDto.username,
             userDto.password,
-            userDto.roles
     )
 }
