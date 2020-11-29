@@ -42,11 +42,11 @@ internal class AsyncValidatorImpl : AsyncValidator {
 
     override fun synchronous(block: Validator.() -> Unit) = collect {
         Mono.just(block)
-                .map { ValidatorImpl().apply(it) }
+                .map(::validate)
                 .flatMap { success() }
     }
 
-    fun run(): Mono<Boolean> = Mono.zip(collectedMono) { values -> values.all { it == true } }
+    fun run(): Mono<Boolean> = Mono.zip(collectedMono) { values -> values.all { it as Boolean } }
 
     private fun collect(creator: () -> Mono<Boolean>) {
         collectedMono.add(creator.invoke())

@@ -59,14 +59,17 @@ class UsersService(
                 isNotNull(group) { "User ${p.username} is not in group with id $groupId" }
             }
 
-    fun updateUsername(userId: String, newUsername: String): Mono<UserPrincipal> =
-            validateAsync {
+    fun updateUsername(userId: String, newUsername: String): Mono<UserPrincipal> = userPrincipalRepository
+            .findById(userId)
+            .validateAsync { principal ->
                 isFalse(userPrincipalRepository.existsByUsername(newUsername)) { "A user with name $newUsername already exists" }
                 synchronous {
+                    isFalse(principal.username == newUsername) { "Current username is the same as the new username" }
                     isNotBlank(newUsername) { "Username may not be empty" }
                 }
             }
-                    .flatMap { userPrincipalRepository.update(userId) { copy(username = username) } }
+            .map { it.copy(username = newUsername) }
+            .flatMap(userPrincipalRepository::save)
 
     fun updatePassword(userId: String, currentPassword: String, newPassword: String): Mono<UserPrincipal> = userPrincipalRepository
             .findById(userId)
@@ -76,10 +79,6 @@ class UsersService(
                 isTrue(passwordEncoder.matches(currentPassword, principal.password)) { "Current password is incorrect" }
                 isFalse(passwordEncoder.matches(newPassword, principal.password)) { "New password matches current password" }
             }
-            .map {
-                it.copy(
-                        password = passwordEncoder.encode(newPassword)
-                )
-            }
+            .map { it.copy(password = passwordEncoder.encode(newPassword)) }
             .flatMap(userPrincipalRepository::save)
 }
