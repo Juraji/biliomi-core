@@ -1,12 +1,13 @@
 package nl.juraji.biliomi.utils.validation
 
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
 fun validateAsync(block: AsyncValidator.() -> Unit): Mono<Boolean> = AsyncValidatorImpl().apply(block).run()
 
 internal class AsyncValidatorImpl : AsyncValidator {
-    private val collectedMono: MutableList<Mono<Boolean>> = mutableListOf()
+    private val creators: MutableList<() -> Mono<Boolean>> = mutableListOf()
 
     override fun isTrue(assertion: Mono<Boolean>, message: () -> String) = collect {
         assertion.flatMap { b ->
@@ -35,21 +36,31 @@ internal class AsyncValidatorImpl : AsyncValidator {
                 .switchIfEmpty { fail(message) }
     }
 
-    override fun ignoreWhen(predicate: Boolean, validation: AsyncValidator.() -> Mono<Boolean>) = collect {
+    override fun unless(predicate: Boolean, validation: AsyncValidator.() -> Unit) = collect {
         if (predicate) success()
-        else validation.invoke(this)
+        else AsyncValidatorImpl().apply(validation).run()
     }
 
-    override fun synchronous(block: Validator.() -> Unit) = collect {
-        Mono.just(block)
+    override fun unless(predicate: Mono<Boolean>, validation: AsyncValidator.() -> Unit) = collect {
+        predicate.flatMap {
+            if (it) success()
+            else AsyncValidatorImpl().apply(validation).run()
+        }
+    }
+
+    override fun synchronous(validation: Validator.() -> Unit) = collect {
+        Mono.just(validation)
                 .map(::validate)
                 .flatMap { success() }
     }
 
-    fun run(): Mono<Boolean> = Mono.zip(collectedMono) { values -> values.all { it as Boolean } }
+    fun run(): Mono<Boolean> = Flux
+            .fromIterable(creators)
+            .flatMap { it.invoke() }
+            .all { it }
 
     private fun collect(creator: () -> Mono<Boolean>) {
-        collectedMono.add(creator.invoke())
+        creators.add(creator)
     }
 
     private fun success(): Mono<Boolean> = Mono.just(true)

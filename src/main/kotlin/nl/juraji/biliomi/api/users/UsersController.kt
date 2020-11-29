@@ -1,7 +1,6 @@
 package nl.juraji.biliomi.api.users
 
 import nl.juraji.biliomi.configuration.security.Authorities
-import nl.juraji.biliomi.security.AuthorityGroup
 import nl.juraji.biliomi.security.UserPrincipal
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -62,8 +61,8 @@ class UsersController(
     @PreAuthorize("hasRole('${Authorities.USERS_ADD_GROUP}')")
     fun addGroupToUser(
             @PathVariable("userId") userId: String,
-            @RequestBody authorityGroup: AuthorityGroup,
-    ): Mono<UserPrincipal> = usersService.addGroupToUser(userId, authorityGroup)
+            @RequestParam("groupId") groupId: String
+    ): Mono<UserPrincipal> = usersService.addGroupToUser(userId, groupId)
 
     @DeleteMapping("/{userId}/groups/{groupId}")
     @PreAuthorize("hasRole('${Authorities.USERS_REMOVE_GROUP}')")

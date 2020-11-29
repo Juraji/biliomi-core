@@ -43,5 +43,5 @@ class BankController(
     fun takePoints(
             @PathVariable("userId") userId: String,
             @RequestParam("amount") amount: Long
-    ): Mono<Unit> = bankService.addPoints(userId, amount)
+    ): Mono<Unit> = bankService.takePoints(userId, amount)
 }

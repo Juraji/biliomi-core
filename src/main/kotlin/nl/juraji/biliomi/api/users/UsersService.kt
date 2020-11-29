@@ -1,7 +1,7 @@
 package nl.juraji.biliomi.api.users
 
-import nl.juraji.biliomi.security.AuthorityGroup
 import nl.juraji.biliomi.security.UserPrincipal
+import nl.juraji.biliomi.security.repositories.AuthorityGroupRepository
 import nl.juraji.biliomi.security.repositories.UserPrincipalRepository
 import nl.juraji.biliomi.utils.extensions.uuid
 import nl.juraji.biliomi.utils.validation.validate
@@ -10,11 +10,14 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
 
 @Service
 class UsersService(
         private val userPrincipalRepository: UserPrincipalRepository,
-        private val passwordEncoder: PasswordEncoder,
+        private val authorityGroupRepository: AuthorityGroupRepository,
+        private val passwordEncoder: PasswordEncoder
 ) {
 
     fun findUsers(): Flux<UserPrincipal> = userPrincipalRepository.findAll()
@@ -40,16 +43,15 @@ class UsersService(
 
     fun deleteUser(userId: String): Mono<UserPrincipal> = userPrincipalRepository.deleteById(userId)
 
-    fun addGroupToUser(userId: String, authorityGroup: AuthorityGroup): Mono<UserPrincipal> = userPrincipalRepository
-            .findById(userId)
-            .validate { p ->
-                isFalse(p.authorityGroups.any { g -> g.groupId == authorityGroup.groupId }) { "User ${p.username} is already in group ${authorityGroup.name}" }
+    fun addGroupToUser(userId: String, groupId: String): Mono<UserPrincipal> = Mono
+            .zip(
+                    userPrincipalRepository.findById(userId),
+                    authorityGroupRepository.findById(groupId)
+            )
+            .validate { (p) ->
+                isFalse(p.authorityGroups.any { g -> g.groupId == groupId }) { "User ${p.username} is already in group $groupId" }
             }
-            .map {
-                it.copy(
-                        authorityGroups = it.authorityGroups.plus(authorityGroup)
-                )
-            }
+            .map { (principal, group) -> principal.copy(authorityGroups = principal.authorityGroups.plus(group)) }
             .flatMap(userPrincipalRepository::save)
 
     fun removeGroupFromUser(userId: String, groupId: String): Mono<UserPrincipal> = userPrincipalRepository

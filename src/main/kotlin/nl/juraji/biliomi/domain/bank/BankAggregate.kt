@@ -2,9 +2,11 @@ package nl.juraji.biliomi.domain.bank
 
 import nl.juraji.biliomi.domain.bank.commands.AddBalanceCommand
 import nl.juraji.biliomi.domain.bank.commands.CreateBankCommand
+import nl.juraji.biliomi.domain.bank.commands.DeleteBankCommand
 import nl.juraji.biliomi.domain.bank.commands.TakeBalanceCommand
 import nl.juraji.biliomi.domain.bank.events.BalanceUpdatedEvent
 import nl.juraji.biliomi.domain.bank.events.BankCreatedEvent
+import nl.juraji.biliomi.domain.bank.events.BankDeletedEvent
 import nl.juraji.biliomi.utils.validation.validate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
@@ -51,6 +53,13 @@ class BankAggregate() {
         ))
     }
 
+    @CommandHandler
+    fun handle(cmd: DeleteBankCommand) {
+        AggregateLifecycle.apply(
+                BankDeletedEvent(userId = userId)
+        )
+    }
+
     @EventSourcingHandler
     fun on(e: BankCreatedEvent) {
         userId = e.userId
@@ -59,5 +68,10 @@ class BankAggregate() {
     @EventSourcingHandler
     fun on(e: BalanceUpdatedEvent) {
         balance = e.newBalance
+    }
+
+    @EventSourcingHandler
+    fun on(e: BankDeletedEvent) {
+        AggregateLifecycle.markDeleted()
     }
 }

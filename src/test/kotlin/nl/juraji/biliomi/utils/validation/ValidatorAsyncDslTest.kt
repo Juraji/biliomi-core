@@ -89,7 +89,61 @@ class ValidatorAsyncDslTest {
     @Test
     fun `isNotBlank should fail when character sequence is blank`() {
         val validated = validateAsync {
-            isNotBlank(Mono.just("  ")) { "Should not throw" }
+            isNotBlank(Mono.just("  ")) { "Should throw" }
+        }
+
+        StepVerifier.create(validated)
+                .expectError(ValidationException::class.java)
+                .verify()
+    }
+
+    @Test
+    fun `unless should skip validation when predicate is true`() {
+        val validated = validateAsync {
+            unless(true) {
+                isNotBlank(Mono.just("  ")) { "Should throw" }
+            }
+        }
+
+        StepVerifier.create(validated)
+                .expectNext(true)
+                .expectComplete()
+                .verify()
+    }
+
+    @Test
+    fun `unless should run validation when predicate is false`() {
+        val validated = validateAsync {
+            unless(false) {
+                isNotBlank(Mono.just("  ")) { "Should throw" }
+            }
+        }
+
+        StepVerifier.create(validated)
+                .expectError(ValidationException::class.java)
+                .verify()
+    }
+
+    @Test
+    fun `unless should skip validation when predicate mono results in true`() {
+        val validated = validateAsync {
+            this.unless(Mono.just(true)) {
+                isNotBlank(Mono.just("  ")) { "Should throw" }
+            }
+        }
+
+        StepVerifier.create(validated)
+                .expectNext(true)
+                .expectComplete()
+                .verify()
+    }
+
+    @Test
+    fun `unless should run validation when predicate mono results in false`() {
+        val validated = validateAsync {
+            this.unless(Mono.just(false)) {
+                isNotBlank(Mono.just("  ")) { "Should throw" }
+            }
         }
 
         StepVerifier.create(validated)

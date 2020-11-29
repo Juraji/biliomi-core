@@ -9,11 +9,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Scheduler
-import java.util.*
 
 @Repository
 interface SyncAuthorityGroupRepository : JpaRepository<AuthorityGroup, String> {
-    fun findByName(groupName: String): Optional<AuthorityGroup>
     fun existsByName(groupName: String): Boolean
 }
 

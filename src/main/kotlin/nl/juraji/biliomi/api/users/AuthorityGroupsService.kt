@@ -20,6 +20,7 @@ class AuthorityGroupsService(
 
     fun createAuthorityGroup(groupName: String, authorities: Set<String>): Mono<AuthorityGroup> =
             validateAsync {
+                isFalse(authorityGroupRepository.existsByName(groupName)) {"A group with name $groupName already exists"}
                 synchronous {
                     isNotBlank(groupName) { "Group name should not be blank" }
                     isNotEmpty(authorities) { "Group authorities may be empty" }

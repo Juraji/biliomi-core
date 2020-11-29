@@ -7,5 +7,5 @@ interface Validator {
     fun isNotBlank(value: String?, message: () -> String)
     fun isNotEmpty(value: Collection<Any>, message: () -> String)
     fun ignoreWhen(predicate: Boolean, validation: Validator.() -> Unit)
-    fun fail(message: () -> String): Nothing = throw ValidationException(message())
+    fun fail(message: () -> String): Nothing
 }
