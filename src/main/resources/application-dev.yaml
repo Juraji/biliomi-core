@@ -7,3 +7,5 @@ logging:
   level:
     root: info
     nl.juraji: debug
+    org.springframework.web: info
+    org.springframework.security: info

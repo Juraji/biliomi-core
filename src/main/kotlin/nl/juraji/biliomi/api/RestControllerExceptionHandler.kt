@@ -6,6 +6,7 @@ import nl.juraji.biliomi.utils.ValidationException
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.server.ResponseStatusException
@@ -39,6 +40,7 @@ class RestControllerExceptionHandler(
                     .map { objectMapper.writeValueAsBytes(it) }
                     .map { exchange.response.bufferFactory().wrap(it) }
 
+            exchange.response.headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             exchange.response.writeWith(body)
         } else {
             exchange.response.setComplete()

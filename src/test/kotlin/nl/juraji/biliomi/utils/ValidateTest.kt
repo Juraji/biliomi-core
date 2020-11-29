@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
-internal class ValidateTest  {
+internal class ValidateTest {
 
     @Test
     fun `isTrue should proceed when assertion is true`() {
@@ -88,6 +88,31 @@ internal class ValidateTest  {
                 ValidateAsync.isFalse(Mono.just(false)) { "Should not throw" },
                 ValidateAsync.isTrue(Mono.just(false)) { "Should throw" }
         )
+
+        StepVerifier.create(validated)
+                .expectErrorMatches { it is ValidationException && it.message == "Should throw" }
+                .verify()
+    }
+
+    @Test
+    fun `all should proceed if assertions block succeed`() {
+        val validated = ValidateAsync.all {
+            isTrue(true) { "Should not throw" }
+            isFalse(false) { "Should not throw" }
+        }
+
+        StepVerifier.create(validated)
+                .expectNext(true)
+                .expectComplete()
+                .verify()
+    }
+
+    @Test
+    fun `all should fail if on or more assertions in block fail`() {
+        val validated = ValidateAsync.all {
+            isFalse(false) { "Should not throw" }
+            isTrue(false) { "Should throw" }
+        }
 
         StepVerifier.create(validated)
                 .expectErrorMatches { it is ValidationException && it.message == "Should throw" }

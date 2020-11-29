@@ -3,7 +3,6 @@ package nl.juraji.biliomi.utils.extensions
 import org.springframework.http.codec.ServerSentEvent
 import reactor.core.publisher.Flux
 import java.time.Duration
-import java.util.*
 
 typealias ServerSentEventFlux<T> = Flux<ServerSentEvent<T?>>
 
@@ -15,7 +14,7 @@ fun <T : Any> Flux<T>.toServerSentEvents(
     val sourceStream: ServerSentEventFlux<T> = this.map {
         ServerSentEvent
                 .builder(it)
-                .id(UUID.randomUUID().toString())
+                .id(uuid())
                 .build()
     }
 

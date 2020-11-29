@@ -1,8 +1,9 @@
 package nl.juraji.biliomi.security
 
+import nl.juraji.biliomi.security.repositories.SyncAuthorityGroupRepository
 import nl.juraji.biliomi.security.repositories.SyncUserPrincipalRepository
-import nl.juraji.biliomi.security.repositories.UserGroupRepository
 import nl.juraji.biliomi.utils.Validate
+import nl.juraji.biliomi.utils.extensions.uuid
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
@@ -11,14 +12,13 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.util.*
 import org.springframework.security.provisioning.GroupManager as SpringGroupManager
 import org.springframework.security.provisioning.UserDetailsManager as SpringUserDetailsManager
 
 @Service
 class UserDetailsManager(
         private val userPrincipalRepository: SyncUserPrincipalRepository,
-        private val groupRepository: UserGroupRepository,
+        private val groupRepository: SyncAuthorityGroupRepository,
         private val passwordEncoder: PasswordEncoder,
 ) : SpringUserDetailsManager, SpringGroupManager {
 
@@ -34,7 +34,7 @@ class UserDetailsManager(
         Validate.isNotBlank(username) { "Username may not be empty or null" }
 
         val user = UserPrincipal(
-                userId = generateId(),
+                userId = uuid(),
                 username = username,
                 password = passwordEncoder.encode(password),
         )
@@ -42,10 +42,9 @@ class UserDetailsManager(
         return userPrincipalRepository.save(user)
     }
 
-
     @Deprecated(
-            "Deprecated in favor of saveUser",
-            replaceWith = ReplaceWith("saveUser(user)")
+            "Deprecated in favor of createUser",
+            replaceWith = ReplaceWith("createUser(user.username,user.password)")
     )
     override fun createUser(user: UserDetails) {
         Validate.isTrue(user is UserPrincipal) { "Expected UserPrincipal got ${user::class.simpleName}" }
@@ -93,19 +92,28 @@ class UserDetailsManager(
         TODO("Not yet implemented")
     }
 
-    override fun createGroup(groupName: String, authorities: List<GrantedAuthority>) {
+    fun createNewGroup(groupName: String, authorities: Collection<GrantedAuthority>): AuthorityGroup {
         Validate.isNotBlank(groupName) { "Group name should not be blank" }
         Validate.isNotEmpty(authorities) { "Group authorities may be empty" }
         Validate.isTrue(authorities.all { it.authority.isNotBlank() }) { "Group authorities may not contain empty values" }
 
         val group = AuthorityGroup(
-                groupId = generateId(),
+                groupId = uuid(),
                 name = groupName,
                 authorities = authorities
                         .map(GrantedAuthority::getAuthority)
                         .toSet()
         )
-        groupRepository.save(group)
+
+        return groupRepository.save(group)
+    }
+
+    @Deprecated(
+            "Deprecated in favor of createNewGroup",
+            replaceWith = ReplaceWith("createNewGroup(groupName, authorities)")
+    )
+    override fun createGroup(groupName: String, authorities: List<GrantedAuthority>) {
+        createNewGroup(groupName, authorities)
     }
 
     override fun deleteGroup(groupName: String) = groupRepository.deleteById(groupName)
@@ -153,7 +161,6 @@ class UserDetailsManager(
     }
 
     companion object {
-        fun generateId(): String = UUID.randomUUID().toString()
         fun usernameNotFound(username: String): AuthenticationException = UsernameNotFoundException("User $username not found")
         fun groupNotFound(groupName: String): GroupNotFoundException = GroupNotFoundException("Group $groupName not found")
     }

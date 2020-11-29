@@ -31,18 +31,28 @@ abstract class DatabaseTest {
             start()
         }
 
+        @Container
+        private val securityContainer = KMySQLContainer("mysql").apply {
+            withDatabaseName("security")
+            withUsername("sa")
+            withPassword("sa")
+            start()
+        }
+
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.datasource.url") { axonContainer.jdbcUrl.replace("jdbc:", "r2dbc:") }
+            registry.add("spring.datasource.url") { axonContainer.jdbcUrl }
             registry.add("spring.datasource.password", axonContainer::getPassword)
             registry.add("spring.datasource.username", axonContainer::getUsername)
-            registry.add("projections.datasource.url") { projectionsContainer.jdbcUrl.replace("jdbc:", "r2dbc:") }
+
+            registry.add("projections.datasource.url") { projectionsContainer.jdbcUrl }
             registry.add("projections.datasource.username", projectionsContainer::getUsername)
             registry.add("projections.datasource.password", projectionsContainer::getPassword)
-            registry.add("projections.flyway.url", projectionsContainer::getJdbcUrl)
-            registry.add("projections.flyway.user", projectionsContainer::getUsername)
-            registry.add("projections.flyway.password", projectionsContainer::getPassword)
+
+            registry.add("security.datasource.url") { securityContainer.jdbcUrl }
+            registry.add("security.datasource.username", securityContainer::getUsername)
+            registry.add("security.datasource.password", securityContainer::getPassword)
         }
     }
 }

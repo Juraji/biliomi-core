@@ -15,7 +15,7 @@ import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 import java.util.*
 
-abstract class ReactiveRepository<T : JpaRepository<E, ID>, E : Any, ID: Any>(
+abstract class ReactiveRepository<T : JpaRepository<E, ID>, E : Any, ID : Any>(
         private val repository: T,
         private val scheduler: Scheduler,
         private val transactionTemplate: TransactionTemplate,
@@ -41,7 +41,7 @@ abstract class ReactiveRepository<T : JpaRepository<E, ID>, E : Any, ID: Any>(
 
     fun deleteAll(): Mono<Unit> = executeInTransaction { deleteAll() }
 
-    fun update(id: ID, update: (E) -> E): Mono<E> = findById(id).flatMap { save(update(it)) }
+    fun update(id: ID, update: E.() -> Unit): Mono<E> = findById(id).flatMap { save(it.apply(update)) }
 
     fun subscribeToAll(): Flux<ReactiveEvent<E>> = updatesProcessor.asFlux()
 

@@ -62,7 +62,16 @@ object ValidateAsync {
     fun all(vararg validations: Mono<Boolean>): Mono<Boolean> =
             Flux.fromArray(validations).flatMap { x -> x }.all { x -> x }.flatMap { success() }
 
+    fun all(block: Validate.() -> Unit): Mono<Boolean> = Mono.just(block)
+            .map(Validate::apply)
+            .flatMap { success() }
 }
+
+fun <T : Any> Mono<T>.validate(block: Validate.(T) -> Unit): Mono<T> =
+        this.map { next -> Validate.apply { block.invoke(this, next) }.let { next } }
+
+fun <T : Any> Flux<T>.validate(block: Validate.(T) -> Unit): Flux<T> =
+        this.map { next -> Validate.apply { block.invoke(this, next) }.let { next } }
 
 data class ValidationException(
         override val message: String,
