@@ -2,9 +2,11 @@ package nl.juraji.biliomi.domain.bank
 
 import nl.juraji.biliomi.domain.bank.commands.AddBalanceCommand
 import nl.juraji.biliomi.domain.bank.commands.CreateBankCommand
+import nl.juraji.biliomi.domain.bank.commands.DeleteBankCommand
 import nl.juraji.biliomi.domain.bank.commands.TakeBalanceCommand
 import nl.juraji.biliomi.domain.bank.events.BalanceUpdatedEvent
 import nl.juraji.biliomi.domain.bank.events.BankCreatedEvent
+import nl.juraji.biliomi.domain.bank.events.BankDeletedEvent
 import nl.juraji.biliomi.utils.extensions.uuid
 import nl.juraji.biliomi.utils.validation.ValidationException
 import org.axonframework.test.aggregate.AggregateTestFixture
@@ -74,5 +76,17 @@ internal class BankAggregateTest {
                 )
                 .`when`(TakeBalanceCommand(userId, 10))
                 .expectException(ValidationException::class.java)
+    }
+
+    @Test
+    internal fun `should be able to delete bank`() {
+        fixture
+                .given(
+                        BankCreatedEvent(userId),
+                        BalanceUpdatedEvent(userId, 0, 5)
+                )
+                .`when`(DeleteBankCommand(userId))
+                .expectEvents(BankDeletedEvent(userId))
+                .expectMarkedDeleted()
     }
 }

@@ -1,0 +1,22 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+multi-tenancy:
+  tenants:
+    - tenantId: axon
+      datasource:
+        url: ${database-test.axon-jdbc-url}
+        username: ${database-test.username}
+        password: ${database-test.password}
+    - tenantId: projections
+      datasource:
+        url: ${database-test.projections-jdbc-url}
+        username: ${database-test.username}
+        password: ${database-test.password}
+    - tenantId: security
+      datasource:
+        url: ${database-test.security-jdbc-url}
+        username: ${database-test.username}
+        password: ${database-test.password}
