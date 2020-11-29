@@ -5,8 +5,8 @@ import nl.juraji.biliomi.domain.bank.commands.CreateBankCommand
 import nl.juraji.biliomi.domain.bank.commands.TakeBalanceCommand
 import nl.juraji.biliomi.domain.bank.events.BalanceUpdatedEvent
 import nl.juraji.biliomi.domain.bank.events.BankCreatedEvent
-import nl.juraji.biliomi.utils.ValidationException
 import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.validation.ValidationException
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -5,7 +5,7 @@ import nl.juraji.biliomi.domain.bank.commands.CreateBankCommand
 import nl.juraji.biliomi.domain.bank.commands.TakeBalanceCommand
 import nl.juraji.biliomi.domain.bank.events.BalanceUpdatedEvent
 import nl.juraji.biliomi.domain.bank.events.BankCreatedEvent
-import nl.juraji.biliomi.utils.Validate
+import nl.juraji.biliomi.utils.validation.validate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
@@ -26,7 +26,9 @@ class BankAggregate() {
 
     @CommandHandler
     fun handle(cmd: AddBalanceCommand) {
-        Validate.isTrue(cmd.amount > 0) { "Amount must be larger than 0" }
+        validate {
+            isTrue(cmd.amount > 0) { "Amount must be larger than 0" }
+        }
 
         AggregateLifecycle.apply(BalanceUpdatedEvent(
                 userId = userId,
@@ -37,8 +39,10 @@ class BankAggregate() {
 
     @CommandHandler
     fun handle(cmd: TakeBalanceCommand) {
-        Validate.isTrue(cmd.amount > 0) { "Amount must be larger than 0" }
-        Validate.isTrue(balance >= cmd.amount) { "Insufficient balance ($balance))" }
+        validate {
+            isTrue(cmd.amount > 0) { "Amount must be larger than 0" }
+            isTrue(balance >= cmd.amount) { "Insufficient balance ($balance))" }
+        }
 
         AggregateLifecycle.apply(BalanceUpdatedEvent(
                 userId = userId,
