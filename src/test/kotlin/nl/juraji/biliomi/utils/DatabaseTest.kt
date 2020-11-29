@@ -1,6 +1,5 @@
 package nl.juraji.biliomi.utils
 
-import nl.juraji.biliomi.utils.extensions.uuid
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -8,17 +7,14 @@ import org.testcontainers.containers.MySQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
-internal class KMySQLContainer : MySQLContainer<KMySQLContainer>("mysql")
-
-internal fun container(block: KMySQLContainer.() -> Unit): KMySQLContainer = KMySQLContainer().apply(block)
-
 @Testcontainers
 @SpringBootTest
 abstract class DatabaseTest {
 
     companion object {
-        private val dbUsername: String = uuid()
-        private val dbPassword: String = uuid()
+
+        private const val dbUsername: String = "sa"
+        private const val dbPassword: String = "sa"
 
         @Container
         private val axonContainer = container {
@@ -44,6 +40,9 @@ abstract class DatabaseTest {
             start()
         }
 
+
+        private fun container(block: KMySQLContainer.() -> Unit): KMySQLContainer = KMySQLContainer().apply(block)
+
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
@@ -56,4 +55,6 @@ abstract class DatabaseTest {
             registry.add("database-test.security-jdbc-url") { securityContainer.jdbcUrl }
         }
     }
+
+    private class KMySQLContainer : MySQLContainer<KMySQLContainer>("mysql")
 }
