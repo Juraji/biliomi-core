@@ -38,6 +38,22 @@ class AuthorityGroupsService(
                     }
                     .flatMap(authorityGroupRepository::save)
 
+    fun copyAuthorityGroup(sourceGroupId: String, newGroupName: String): Mono<AuthorityGroup> = authorityGroupRepository
+            .findById(sourceGroupId)
+            .validateAsync {
+                isFalse(authorityGroupRepository.existsByName(newGroupName)) { "A group with name $newGroupName already exists" }
+                synchronous {
+                    isNotBlank(newGroupName) { "Group name should not be blank" }
+                }
+            }
+            .map {
+                it.copy(
+                        groupId = uuid(),
+                        name = newGroupName
+                )
+            }
+            .flatMap(authorityGroupRepository::save)
+
     fun updateAuthorityGroup(update: AuthorityGroup): Mono<AuthorityGroup> = authorityGroupRepository
             .findById(update.groupId)
             .validateAsync {

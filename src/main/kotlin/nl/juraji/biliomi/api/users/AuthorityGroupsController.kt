@@ -27,6 +27,13 @@ class AuthorityGroupsController(
             authorities = createAuthorityGroupDto.authorities,
     )
 
+    @PostMapping("/copy")
+    @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
+    fun copyAuthorityGroup(
+            @RequestParam("sourceGroupId") sourceGroupId: String,
+            @RequestParam("newGroupName") newGroupName: String
+    ): Mono<AuthorityGroup> = authorityGroupsService.copyAuthorityGroup(sourceGroupId, newGroupName)
+
     @PutMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_UPDATE}')")
     fun updateAuthorityGroup(
