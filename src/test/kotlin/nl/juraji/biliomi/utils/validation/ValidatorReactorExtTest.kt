@@ -36,7 +36,7 @@ class ValidatorReactorExtTest {
     internal fun `should not fail mono when async validation passes`() {
         val mono = Mono.just("Something")
                 .validateAsync {
-                    isNotBlank(it.toMono()) { "Should pass" }
+                    isTrue(it.isNotBlank().toMono()) { "Should not pass" }
                 }
 
         StepVerifier.create(mono)
@@ -48,7 +48,7 @@ class ValidatorReactorExtTest {
     internal fun `should fail mono when async validation does not pass`() {
         val mono = Mono.just("   ")
                 .validateAsync {
-                    isNotBlank(it.toMono()) { "Should not pass" }
+                    isTrue(it.isNotBlank().toMono()) { "Should not pass" }
                 }
 
         StepVerifier.create(mono)
@@ -86,7 +86,7 @@ class ValidatorReactorExtTest {
     internal fun `should not fail flux when async validation passes`() {
         val mono = Flux.just("Something", "Something else")
                 .validateAsync {
-                    isNotBlank(it.toMono()) { "Should pass" }
+                    isTrue(true.toMono()) { "Should pass" }
                 }
 
         StepVerifier.create(mono)
@@ -99,7 +99,7 @@ class ValidatorReactorExtTest {
     internal fun `should fail flux when async validation does not pass on single item`() {
         val mono = Flux.just("Something", "  ", "Something else")
                 .validateAsync {
-                    isNotBlank(it.toMono()) { "Should not pass" }
+                    isTrue(it.isNotBlank().toMono()) { "Should not pass" }
                 }
 
         StepVerifier.create(mono)

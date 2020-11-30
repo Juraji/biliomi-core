@@ -2,9 +2,6 @@ package nl.juraji.biliomi.utils.validation
 
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
-
-fun validateAsync(block: AsyncValidator.() -> Unit): Mono<Boolean> = AsyncValidatorImpl().apply(block).run()
 
 internal class AsyncValidatorImpl : AsyncValidator {
     private val creators: MutableList<() -> Mono<Boolean>> = mutableListOf()
@@ -21,19 +18,6 @@ internal class AsyncValidatorImpl : AsyncValidator {
             if (!b) success()
             else fail(message)
         }
-    }
-
-    override fun isNotEmpty(value: Mono<Any>, message: () -> String) = collect {
-        value
-                .flatMap { success() }
-                .switchIfEmpty { fail(message) }
-    }
-
-    override fun isNotBlank(value: Mono<CharSequence>, message: () -> String) = collect {
-        value
-                .filter(CharSequence::isNotBlank)
-                .flatMap { success() }
-                .switchIfEmpty { fail(message) }
     }
 
     override fun unless(predicate: Boolean, validation: AsyncValidator.() -> Unit) = collect {
