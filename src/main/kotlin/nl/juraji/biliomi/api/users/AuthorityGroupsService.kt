@@ -20,7 +20,8 @@ class AuthorityGroupsService(
 
     fun createAuthorityGroup(groupName: String, authorities: Set<String>): Mono<AuthorityGroup> =
             validateAsync {
-                isFalse(authorityGroupRepository.existsByName(groupName)) {"A group with name $groupName already exists"}
+                isFalse(authorityGroupRepository.existsByName(groupName)) { "A group with name $groupName already exists" }
+
                 synchronous {
                     isNotBlank(groupName) { "Group name should not be blank" }
                     isNotEmpty(authorities) { "Group authorities may be empty" }
@@ -37,23 +38,27 @@ class AuthorityGroupsService(
                     }
                     .flatMap(authorityGroupRepository::save)
 
-    fun updateAuthorityGroup(authorityGroup: AuthorityGroup): Mono<AuthorityGroup> =
-            validateAsync {
+    fun updateAuthorityGroup(update: AuthorityGroup): Mono<AuthorityGroup> = authorityGroupRepository
+            .findById(update.groupId)
+            .validateAsync {
+                unless(it.name == update.name) {
+                    isFalse(authorityGroupRepository.existsByName(update.name)) { "A group with name ${update.name} already exists" }
+                }
+
                 synchronous {
-                    isNotBlank(authorityGroup.name) { "Group name should not be blank" }
-                    isNotEmpty(authorityGroup.authorities) { "Group authorities may be empty" }
-                    isTrue(authorityGroup.authorities.all(String::isNotBlank)) { "Group authorities may not contain empty values" }
-                    isTrue(authorityGroup.authorities.all(Authorities.all::contains)) { "Unknown entry found in authorities" }
+                    isNotBlank(update.name) { "Group name should not be blank" }
+                    isNotEmpty(update.authorities) { "Group authorities may be empty" }
+                    isTrue(update.authorities.all(String::isNotBlank)) { "Group authorities may not contain empty values" }
+                    isTrue(update.authorities.all(Authorities.all::contains)) { "Unknown entry found in authorities" }
                 }
             }
-                    .flatMap {
-                        authorityGroupRepository.update(authorityGroup.groupId) {
-                            copy(
-                                    name = authorityGroup.name,
-                                    authorities = authorityGroup.authorities
-                            )
-                        }
-                    }
+            .map {
+                it.copy(
+                        name = update.name,
+                        authorities = update.authorities
+                )
+            }
+            .flatMap(authorityGroupRepository::save)
 
     fun deleteAuthorityGroup(authorityGroupId: String): Mono<AuthorityGroup> = authorityGroupRepository
             .findById(authorityGroupId)
