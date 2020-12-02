@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("org.m2ci.msp.github-ivy-repo") version "0.1.1"
     id("org.springframework.boot") version "2.4.0"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.4.20"
@@ -8,6 +9,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.jpa") version "1.4.20"
     kotlin("jvm") version "1.4.20"
     kotlin("plugin.spring") version "1.4.20"
+
 }
 
 group = "nl.juraji"
@@ -17,12 +19,14 @@ java.targetCompatibility = JavaVersion.VERSION_14
 
 val axon = "4.4.5"
 val axonReactor = "4.4.2"
+val reactorValidations = "1.0.5"
 val mockk = "1.10.2"
 val springMockk = "3.0.0"
 val testcontainers = "1.15.0"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 noArg {
@@ -55,6 +59,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("io.projectreactor:reactor-tools")
+    implementation("com.github.Juraji:reactor-validations:$reactorValidations")
 
     runtimeOnly("mysql:mysql-connector-java")
 

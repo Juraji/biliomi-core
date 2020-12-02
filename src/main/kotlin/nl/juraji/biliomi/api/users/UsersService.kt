@@ -4,8 +4,8 @@ import nl.juraji.biliomi.security.UserPrincipal
 import nl.juraji.biliomi.security.repositories.AuthorityGroupRepository
 import nl.juraji.biliomi.security.repositories.UserPrincipalRepository
 import nl.juraji.biliomi.utils.extensions.uuid
-import nl.juraji.biliomi.utils.validation.validate
-import nl.juraji.biliomi.utils.validation.validateAsync
+import nl.juraji.reactor.validations.validate
+import nl.juraji.reactor.validations.validateAsync
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux

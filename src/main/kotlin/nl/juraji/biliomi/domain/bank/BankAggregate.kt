@@ -7,7 +7,7 @@ import nl.juraji.biliomi.domain.bank.commands.TakeBalanceCommand
 import nl.juraji.biliomi.domain.bank.events.BalanceUpdatedEvent
 import nl.juraji.biliomi.domain.bank.events.BankCreatedEvent
 import nl.juraji.biliomi.domain.bank.events.BankDeletedEvent
-import nl.juraji.biliomi.utils.validation.validate
+import nl.juraji.reactor.validations.validate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier

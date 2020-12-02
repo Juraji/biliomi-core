@@ -4,8 +4,8 @@ import nl.juraji.biliomi.configuration.security.Authorities
 import nl.juraji.biliomi.security.AuthorityGroup
 import nl.juraji.biliomi.security.repositories.AuthorityGroupRepository
 import nl.juraji.biliomi.utils.extensions.uuid
-import nl.juraji.biliomi.utils.validation.validate
-import nl.juraji.biliomi.utils.validation.validateAsync
+import nl.juraji.reactor.validations.validate
+import nl.juraji.reactor.validations.validateAsync
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux

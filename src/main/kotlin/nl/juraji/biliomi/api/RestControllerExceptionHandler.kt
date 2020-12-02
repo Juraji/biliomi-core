@@ -2,7 +2,7 @@ package nl.juraji.biliomi.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import nl.juraji.biliomi.utils.LoggerCompanion
-import nl.juraji.biliomi.utils.validation.ValidationException
+import nl.juraji.reactor.validations.ValidationException
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.buffer.DataBuffer
