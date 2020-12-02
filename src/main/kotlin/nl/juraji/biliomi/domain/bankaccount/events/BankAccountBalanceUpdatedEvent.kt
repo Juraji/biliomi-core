@@ -1,10 +1,10 @@
-package nl.juraji.biliomi.domain.bank.events
+package nl.juraji.biliomi.domain.bankaccount.events
 
 import org.axonframework.serialization.Revision
 
 @Revision("1.0")
-data class BalanceUpdatedEvent(
+data class BankAccountBalanceUpdatedEvent(
         override val userId: String,
         val previousBalance: Long,
         val newBalance: Long
-) : BankEvent
+) : BankAccountEvent

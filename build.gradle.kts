@@ -19,7 +19,7 @@ java.targetCompatibility = JavaVersion.VERSION_14
 
 val axon = "4.4.5"
 val axonReactor = "4.4.2"
-val reactorValidations = "1.0.5"
+val reactorValidations = "master-SNAPSHOT"
 val mockk = "1.10.2"
 val springMockk = "3.0.0"
 val testcontainers = "1.15.0"

@@ -1,8 +1,8 @@
-package nl.juraji.biliomi.domain.bank.commands
+package nl.juraji.biliomi.domain.bankaccount.commands
 
 import org.axonframework.modelling.command.TargetAggregateIdentifier
 
-abstract class BankCommand(
+abstract class BankAccountCommand(
         @TargetAggregateIdentifier
         open val userId: String
 )
