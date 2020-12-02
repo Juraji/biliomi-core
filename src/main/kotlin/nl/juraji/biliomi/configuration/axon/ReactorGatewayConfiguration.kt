@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class ReactorGatewayConfiguration(
-        private val commandGateway: ReactorCommandGateway
+    private val commandGateway: ReactorCommandGateway
 ) : InitializingBean {
 
     override fun afterPropertiesSet() {

@@ -13,27 +13,27 @@ import org.springframework.stereotype.Service
 @Service
 @ProcessingGroup(ProcessingGroups.PROJECTIONS)
 class BankProjectionEventHandler(
-        private val bankProjectionRepository: BankProjectionRepository
+    private val bankProjectionRepository: BankProjectionRepository
 ) {
 
     @EventHandler
     fun on(e: BankAccountCreatedEvent) {
         bankProjectionRepository
-                .save(BankProjection(userId = e.userId))
-                .block()
+            .save(BankProjection(userId = e.userId))
+            .block()
     }
 
     @EventHandler
     fun on(e: BankAccountBalanceUpdatedEvent) {
         bankProjectionRepository
-                .update(e.userId) { copy(balance = e.newBalance) }
-                .block()
+            .update(e.userId) { copy(balance = e.newBalance) }
+            .block()
     }
 
     @EventHandler
     fun on(e: BankAccountDeletedEvent) {
         bankProjectionRepository
-                .deleteById(e.userId)
-                .block()
+            .deleteById(e.userId)
+            .block()
     }
 }

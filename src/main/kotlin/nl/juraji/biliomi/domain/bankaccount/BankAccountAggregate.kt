@@ -32,11 +32,13 @@ class BankAccountAggregate() {
             isTrue(cmd.amount > 0) { "Amount must be larger than 0" }
         }
 
-        AggregateLifecycle.apply(BankAccountBalanceUpdatedEvent(
+        AggregateLifecycle.apply(
+            BankAccountBalanceUpdatedEvent(
                 userId = userId,
                 previousBalance = balance,
                 newBalance = balance + cmd.amount
-        ))
+            )
+        )
     }
 
     @CommandHandler
@@ -46,17 +48,19 @@ class BankAccountAggregate() {
             isTrue(balance >= cmd.amount) { "Insufficient balance ($balance))" }
         }
 
-        AggregateLifecycle.apply(BankAccountBalanceUpdatedEvent(
+        AggregateLifecycle.apply(
+            BankAccountBalanceUpdatedEvent(
                 userId = userId,
                 previousBalance = balance,
                 newBalance = balance - cmd.amount
-        ))
+            )
+        )
     }
 
     @CommandHandler
     fun handle(cmd: DeleteBankAccountCommand) {
         AggregateLifecycle.apply(
-                BankAccountDeletedEvent(userId = userId)
+            BankAccountDeletedEvent(userId = userId)
         )
     }
 

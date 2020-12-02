@@ -13,37 +13,41 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 fun <T> withWebContext(
-        method: HttpMethod = HttpMethod.POST,
-        url: String = "/api/test",
-        headers: HttpHeaders.() -> Unit = {},
-        queryParams: HttpHeaders.() -> Unit = {},
-        authentication: Authentication = TestingAuthenticationToken(null, null),
-        supplier: () -> Mono<T>,
+    method: HttpMethod = HttpMethod.POST,
+    url: String = "/api/test",
+    headers: HttpHeaders.() -> Unit = {},
+    queryParams: HttpHeaders.() -> Unit = {},
+    authentication: Authentication = TestingAuthenticationToken(null, null),
+    supplier: () -> Mono<T>,
 ): Mono<T> = supplier().contextWrite { ctx ->
     ctx
-            .put(ServerWebExchange::class.java, MockServerWebExchange.from(
-                    MockServerHttpRequest
-                            .method(method, url)
-                            .headers(HttpHeaders().apply(headers))
-                            .queryParams(HttpHeaders().apply(queryParams))
-            ))
-            .put(SecurityContext::class.java, Mono.just(SecurityContextImpl(authentication)))
+        .put(
+            ServerWebExchange::class.java, MockServerWebExchange.from(
+                MockServerHttpRequest
+                    .method(method, url)
+                    .headers(HttpHeaders().apply(headers))
+                    .queryParams(HttpHeaders().apply(queryParams))
+            )
+        )
+        .put(SecurityContext::class.java, Mono.just(SecurityContextImpl(authentication)))
 }
 
 fun <T> withWebContextFlux(
-        method: HttpMethod = HttpMethod.POST,
-        url: String = "/api/test",
-        headers: HttpHeaders.() -> Unit = {},
-        queryParams: HttpHeaders.() -> Unit = {},
-        authentication: Authentication = TestingAuthenticationToken(null, null),
-        supplier: () -> Flux<T>,
+    method: HttpMethod = HttpMethod.POST,
+    url: String = "/api/test",
+    headers: HttpHeaders.() -> Unit = {},
+    queryParams: HttpHeaders.() -> Unit = {},
+    authentication: Authentication = TestingAuthenticationToken(null, null),
+    supplier: () -> Flux<T>,
 ): Flux<T> = supplier().contextWrite { ctx ->
     ctx
-            .put(ServerWebExchange::class.java, MockServerWebExchange.from(
-                    MockServerHttpRequest
-                            .method(method, url)
-                            .headers(HttpHeaders().apply(headers))
-                            .queryParams(HttpHeaders().apply(queryParams))
-            ))
-            .put(SecurityContext::class.java, Mono.just(SecurityContextImpl(authentication)))
+        .put(
+            ServerWebExchange::class.java, MockServerWebExchange.from(
+                MockServerHttpRequest
+                    .method(method, url)
+                    .headers(HttpHeaders().apply(headers))
+                    .queryParams(HttpHeaders().apply(queryParams))
+            )
+        )
+        .put(SecurityContext::class.java, Mono.just(SecurityContextImpl(authentication)))
 }

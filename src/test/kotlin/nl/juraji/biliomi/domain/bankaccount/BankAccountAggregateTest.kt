@@ -25,68 +25,68 @@ internal class BankAccountAggregateTest {
     @Test
     internal fun `should be able to create account`() {
         fixture
-                .`when`(CreateBankAccountCommand(userId))
-                .expectEvents(BankAccountCreatedEvent(userId))
+            .`when`(CreateBankAccountCommand(userId))
+            .expectEvents(BankAccountCreatedEvent(userId))
     }
 
     @Test
     internal fun `should be able to add points`() {
         fixture
-                .given(
-                        BankAccountCreatedEvent(userId),
-                        BankAccountBalanceUpdatedEvent(userId, 0, 25)
-                )
-                .`when`(AddBankAccountBalanceCommand(userId, 10))
-                .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 35))
+            .given(
+                BankAccountCreatedEvent(userId),
+                BankAccountBalanceUpdatedEvent(userId, 0, 25)
+            )
+            .`when`(AddBankAccountBalanceCommand(userId, 10))
+            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 35))
     }
 
     @Test
     internal fun `should fail to add negative points`() {
         fixture
-                .given(BankAccountCreatedEvent(userId))
-                .`when`(AddBankAccountBalanceCommand(userId, -10))
-                .expectException(ValidationException::class.java)
+            .given(BankAccountCreatedEvent(userId))
+            .`when`(AddBankAccountBalanceCommand(userId, -10))
+            .expectException(ValidationException::class.java)
     }
 
     @Test
     internal fun `should be able to take points`() {
         fixture
-                .given(
-                        BankAccountCreatedEvent(userId),
-                        BankAccountBalanceUpdatedEvent(userId, 0, 25)
-                )
-                .`when`(TakeBankAccountBalanceCommand(userId, 10))
-                .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 15))
+            .given(
+                BankAccountCreatedEvent(userId),
+                BankAccountBalanceUpdatedEvent(userId, 0, 25)
+            )
+            .`when`(TakeBankAccountBalanceCommand(userId, 10))
+            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 15))
     }
 
     @Test
     internal fun `should fail to take negative points`() {
         fixture
-                .given(BankAccountCreatedEvent(userId))
-                .`when`(TakeBankAccountBalanceCommand(userId, -10))
-                .expectException(ValidationException::class.java)
+            .given(BankAccountCreatedEvent(userId))
+            .`when`(TakeBankAccountBalanceCommand(userId, -10))
+            .expectException(ValidationException::class.java)
     }
 
     @Test
     internal fun `should fail to take points when balance too low`() {
         fixture
-                .given(
-                        BankAccountCreatedEvent(userId),
-                        BankAccountBalanceUpdatedEvent(userId, 0, 5)
-                )
-                .`when`(TakeBankAccountBalanceCommand(userId, 10))
-                .expectException(ValidationException::class.java)
+            .given(
+                BankAccountCreatedEvent(userId),
+                BankAccountBalanceUpdatedEvent(userId, 0, 5)
+            )
+            .`when`(TakeBankAccountBalanceCommand(userId, 10))
+            .expectException(ValidationException::class.java)
     }
 
     @Test
     internal fun `should be able to delete bank`() {
         fixture
-                .given(
-                        BankAccountCreatedEvent(userId),
-                        BankAccountBalanceUpdatedEvent(userId, 0, 5)
-                )
-                .`when`(DeleteBankAccountCommand(userId))
-                .expectEvents(BankAccountDeletedEvent(userId))
-                .expectMarkedDeleted()
+            .given(
+                BankAccountCreatedEvent(userId),
+                BankAccountBalanceUpdatedEvent(userId, 0, 5)
+            )
+            .`when`(DeleteBankAccountCommand(userId))
+            .expectEvents(BankAccountDeletedEvent(userId))
+            .expectMarkedDeleted()
     }
 }

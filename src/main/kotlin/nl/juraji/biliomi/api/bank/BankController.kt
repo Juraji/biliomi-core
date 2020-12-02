@@ -12,19 +12,19 @@ import reactor.core.publisher.Mono
 @RestController
 @RequestMapping("/account")
 class BankController(
-        private val bankService: BankService
+    private val bankService: BankService
 ) {
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ME}')")
     fun getMyAccount(
-            @AuthenticationPrincipal principal: UserPrincipal
+        @AuthenticationPrincipal principal: UserPrincipal
     ): Mono<BankProjection> = bankService.getAccountByUserId(principal.userId)
 
     @GetMapping("/{userId}")
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ALL}')")
     fun getAccount(
-            @PathVariable("userId") userId: String
+        @PathVariable("userId") userId: String
     ): Mono<BankProjection> = bankService.getAccountByUserId(userId)
 
     @GetMapping
@@ -34,14 +34,14 @@ class BankController(
     @PostMapping("/{userId}/points/add")
     @PreAuthorize("hasRole('${Authorities.BANK_ADD_POINTS}')")
     fun addPoints(
-            @PathVariable("userId") userId: String,
-            @RequestParam("amount") amount: Long
+        @PathVariable("userId") userId: String,
+        @RequestParam("amount") amount: Long
     ): Mono<Unit> = bankService.addPoints(userId, amount)
 
     @PostMapping("/{userId}/points/take")
     @PreAuthorize("hasRole('${Authorities.BANK_TAKE_POINTS}')")
     fun takePoints(
-            @PathVariable("userId") userId: String,
-            @RequestParam("amount") amount: Long
+        @PathVariable("userId") userId: String,
+        @RequestParam("amount") amount: Long
     ): Mono<Unit> = bankService.takePoints(userId, amount)
 }

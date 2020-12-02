@@ -9,11 +9,11 @@ import javax.persistence.*
 
 @Entity
 data class UserPrincipal(
-        @Id val userId: String,
-        private val enabled: Boolean = true,
-        @ManyToMany(fetch = FetchType.EAGER) val authorityGroups: Set<AuthorityGroup> = emptySet(),
-        @Column(unique = true) private val username: String,
-        @JsonIgnore private var password: String,
+    @Id val userId: String,
+    private val enabled: Boolean = true,
+    @ManyToMany(fetch = FetchType.EAGER) val authorityGroups: Set<AuthorityGroup> = emptySet(),
+    @Column(unique = true) private val username: String,
+    @JsonIgnore private var password: String,
 ) : UserDetails, CredentialsContainer {
     override fun getPassword(): String = password
     override fun getUsername(): String = username
@@ -21,10 +21,10 @@ data class UserPrincipal(
 
     @JsonIgnore
     override fun getAuthorities(): Collection<GrantedAuthority> = authorityGroups
-            .flatMap(AuthorityGroup::authorities)
-            .map(::SimpleGrantedAuthority)
-            .toSet()
-            .sortedBy { it.authority }
+        .flatMap(AuthorityGroup::authorities)
+        .map(::SimpleGrantedAuthority)
+        .toSet()
+        .sortedBy { it.authority }
 
     @JsonIgnore
     override fun isAccountNonExpired(): Boolean = true

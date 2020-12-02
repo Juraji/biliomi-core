@@ -15,12 +15,12 @@ class DeadlineManagerConfiguration {
     @Bean
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     fun deadlineManager(
-            axonConfig: AxonConfiguration,
-            transactionManager: TransactionManager,
-            scheduler: Scheduler,
+        axonConfig: AxonConfiguration,
+        transactionManager: TransactionManager,
+        scheduler: Scheduler,
     ): DeadlineManager = QuartzDeadlineManager.builder()
-            .transactionManager(transactionManager)
-            .scopeAwareProvider(ConfigurationScopeAwareProvider(axonConfig))
-            .scheduler(scheduler)
-            .build()
+        .transactionManager(transactionManager)
+        .scopeAwareProvider(ConfigurationScopeAwareProvider(axonConfig))
+        .scheduler(scheduler)
+        .build()
 }

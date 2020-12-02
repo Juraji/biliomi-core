@@ -18,35 +18,35 @@ import javax.sql.DataSource
 @Configuration
 @EnableTransactionManagement
 class EventSourcingDataSourceConfiguration(
-        multiTenancyConfiguration: MultiTenancyConfiguration,
+    multiTenancyConfiguration: MultiTenancyConfiguration,
 ) {
     private val tenant: Tenant = multiTenancyConfiguration.findTenant("axon")
 
     @Primary
     @Bean(name = ["dataSource"])
     fun dataSource(): DataSource = tenant.datasource
-            .initializeDataSourceBuilder()
-            .type(HikariDataSource::class.java)
-            .build()
+        .initializeDataSourceBuilder()
+        .type(HikariDataSource::class.java)
+        .build()
 
     @Primary
     @Bean(name = ["entityManagerFactory"])
     fun entityManagerFactory(
-            builder: EntityManagerFactoryBuilder,
-            @Qualifier("dataSource") dataSource: DataSource,
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("dataSource") dataSource: DataSource,
     ): LocalContainerEntityManagerFactoryBean = builder
-            .dataSource(dataSource)
-            .packages(
-                    "org.axonframework.eventhandling.tokenstore",
-                    "org.axonframework.modelling.saga.repository.jpa",
-                    "org.axonframework.eventsourcing.eventstore.jpa"
-            )
-            .persistenceUnit("axon")
-            .build()
+        .dataSource(dataSource)
+        .packages(
+            "org.axonframework.eventhandling.tokenstore",
+            "org.axonframework.modelling.saga.repository.jpa",
+            "org.axonframework.eventsourcing.eventstore.jpa"
+        )
+        .persistenceUnit("axon")
+        .build()
 
     @Primary
     @Bean("transactionManager")
     fun projectionsTransactionManager(
-            @Qualifier("entityManagerFactory") entityManagerFactory: EntityManagerFactory,
+        @Qualifier("entityManagerFactory") entityManagerFactory: EntityManagerFactory,
     ): PlatformTransactionManager = JpaTransactionManager(entityManagerFactory)
 }

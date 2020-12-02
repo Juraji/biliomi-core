@@ -25,7 +25,7 @@ object Authorities {
 
     val all: List<String> by lazy {
         Authorities::class.memberProperties
-                .filter { it.returnType.isSubtypeOf(String::class.starProjectedType) }
-                .map { it.getter.call() as String }
+            .filter { it.returnType.isSubtypeOf(String::class.starProjectedType) }
+            .map { it.getter.call() as String }
     }
 }

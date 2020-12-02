@@ -22,45 +22,45 @@ import javax.sql.DataSource
 
 @Configuration
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "projectionsEntityManagerFactory",
-        transactionManagerRef = "projectionsTransactionManager",
-        basePackages = ["nl.juraji.biliomi.projections.repositories"]
+    entityManagerFactoryRef = "projectionsEntityManagerFactory",
+    transactionManagerRef = "projectionsTransactionManager",
+    basePackages = ["nl.juraji.biliomi.projections.repositories"]
 )
 class ProjectionsDataSourceConfiguration(
-        multiTenancyConfiguration: MultiTenancyConfiguration,
+    multiTenancyConfiguration: MultiTenancyConfiguration,
 ) {
     private val tenant: Tenant = multiTenancyConfiguration.findTenant("projections")
 
     @Bean(name = ["projectionsDataSource"])
     fun dataSource(): DataSource = tenant.datasource
-            .initializeDataSourceBuilder()
-            .type(HikariDataSource::class.java)
-            .build()
+        .initializeDataSourceBuilder()
+        .type(HikariDataSource::class.java)
+        .build()
 
     @Bean(name = ["projectionsEntityManagerFactory"])
     fun projectionsEntityManagerFactory(
-            builder: EntityManagerFactoryBuilder,
-            @Qualifier("projectionsDataSource") dataSource: DataSource,
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("projectionsDataSource") dataSource: DataSource,
     ): LocalContainerEntityManagerFactoryBean = builder
-            .dataSource(dataSource)
-            .packages(
-                    "nl.juraji.biliomi.projections"
-            )
-            .persistenceUnit(tenant.tenantId)
-            .build()
+        .dataSource(dataSource)
+        .packages(
+            "nl.juraji.biliomi.projections"
+        )
+        .persistenceUnit(tenant.tenantId)
+        .build()
 
     @Bean("projectionsTransactionManager")
     fun projectionsTransactionManager(
-            @Qualifier("projectionsEntityManagerFactory") entityManagerFactory: EntityManagerFactory,
+        @Qualifier("projectionsEntityManagerFactory") entityManagerFactory: EntityManagerFactory,
     ): PlatformTransactionManager = JpaTransactionManager(entityManagerFactory)
 
     @Bean(name = ["projectionsScheduler"])
     fun jdbcScheduler(
-            @Qualifier("projectionsDataSource") dataSource: DataSource,
+        @Qualifier("projectionsDataSource") dataSource: DataSource,
     ): Scheduler {
         val pool: ExecutorService = Executors.newFixedThreadPool(
-                (dataSource as HikariDataSource).maximumPoolSize,
-                NumberedThreadFactory("projections-scheduler")
+            (dataSource as HikariDataSource).maximumPoolSize,
+            NumberedThreadFactory("projections-scheduler")
         )
         return Schedulers.fromExecutor(pool)
     }

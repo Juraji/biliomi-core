@@ -14,19 +14,18 @@ import java.util.*
 @Repository
 interface SyncUserPrincipalRepository : JpaRepository<UserPrincipal, String> {
     fun findByUsername(username: String): Optional<UserPrincipal>
-    fun deleteByUsername(username: String)
     fun existsByUsername(username: String): Boolean
 }
 
 @Service
 class UserPrincipalRepository(
-        syncUserPrincipalRepository: SyncUserPrincipalRepository,
-        transactionTemplate: TransactionTemplate,
-        @Qualifier("securityScheduler") scheduler: Scheduler,
+    syncUserPrincipalRepository: SyncUserPrincipalRepository,
+    transactionTemplate: TransactionTemplate,
+    @Qualifier("securityScheduler") scheduler: Scheduler,
 ) : ReactiveRepository<SyncUserPrincipalRepository, UserPrincipal, String>(
-        syncUserPrincipalRepository,
-        scheduler,
-        transactionTemplate
+    syncUserPrincipalRepository,
+    scheduler,
+    transactionTemplate
 ) {
     fun findByUsername(username: String): Mono<UserPrincipal> = fromOptional { findByUsername(username) }
     fun existsByUsername(username: String): Mono<Boolean> = from { existsByUsername(username) }

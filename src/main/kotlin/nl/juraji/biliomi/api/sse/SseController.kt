@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/events")
 class SseController(
-        private val sseService: SseService
+    private val sseService: SseService
 ) {
 
     @GetMapping
     @PreAuthorize("hasRole('${Authorities.SSE_CONNECT}')")
     fun getEvents(): ServerSentEventFlux<DomainEvent> = sseService
-            .getEvents()
-            .toServerSentEvents()
+        .getEvents()
+        .toServerSentEvents()
 }

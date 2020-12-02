@@ -23,45 +23,45 @@ import javax.sql.DataSource
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "securityEntityManagerFactory",
-        transactionManagerRef = "securityTransactionManager",
-        basePackages = ["nl.juraji.biliomi.security.repositories"]
+    entityManagerFactoryRef = "securityEntityManagerFactory",
+    transactionManagerRef = "securityTransactionManager",
+    basePackages = ["nl.juraji.biliomi.security.repositories"]
 )
 class SecurityDataSourceConfiguration(
-        multiTenancyConfiguration: MultiTenancyConfiguration,
+    multiTenancyConfiguration: MultiTenancyConfiguration,
 ) {
     private val tenant: Tenant = multiTenancyConfiguration.findTenant("security")
 
     @Bean(name = ["securityDataSource"])
     fun dataSource(): DataSource = tenant.datasource
-            .initializeDataSourceBuilder()
-            .type(HikariDataSource::class.java)
-            .build()
+        .initializeDataSourceBuilder()
+        .type(HikariDataSource::class.java)
+        .build()
 
     @Bean(name = ["securityEntityManagerFactory"])
     fun securityEntityManagerFactory(
-            builder: EntityManagerFactoryBuilder,
-            @Qualifier("securityDataSource") dataSource: DataSource,
+        builder: EntityManagerFactoryBuilder,
+        @Qualifier("securityDataSource") dataSource: DataSource,
     ): LocalContainerEntityManagerFactoryBean = builder
-            .dataSource(dataSource)
-            .packages(
-                    "nl.juraji.biliomi.security"
-            )
-            .persistenceUnit("security")
-            .build()
+        .dataSource(dataSource)
+        .packages(
+            "nl.juraji.biliomi.security"
+        )
+        .persistenceUnit("security")
+        .build()
 
     @Bean("securityTransactionManager")
     fun securityTransactionManager(
-            @Qualifier("securityEntityManagerFactory") entityManagerFactory: EntityManagerFactory,
+        @Qualifier("securityEntityManagerFactory") entityManagerFactory: EntityManagerFactory,
     ): PlatformTransactionManager = JpaTransactionManager(entityManagerFactory)
 
     @Bean(name = ["securityScheduler"])
     fun jdbcScheduler(
-            @Qualifier("securityDataSource") dataSource: DataSource,
+        @Qualifier("securityDataSource") dataSource: DataSource,
     ): Scheduler {
         val pool: ExecutorService = Executors.newFixedThreadPool(
-                (dataSource as HikariDataSource).maximumPoolSize,
-                NumberedThreadFactory("security-scheduler")
+            (dataSource as HikariDataSource).maximumPoolSize,
+            NumberedThreadFactory("security-scheduler")
         )
         return Schedulers.fromExecutor(pool)
     }

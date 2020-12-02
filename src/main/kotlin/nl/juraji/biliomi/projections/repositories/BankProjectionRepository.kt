@@ -14,11 +14,11 @@ interface SyncBankProjectionRepository : JpaRepository<BankProjection, String>
 
 @Service
 class BankProjectionRepository(
-        syncBankProjectionRepository: SyncBankProjectionRepository,
-        transactionTemplate: TransactionTemplate,
-        @Qualifier("projectionsScheduler") scheduler: Scheduler
+    syncBankProjectionRepository: SyncBankProjectionRepository,
+    transactionTemplate: TransactionTemplate,
+    @Qualifier("projectionsScheduler") scheduler: Scheduler
 ) : ReactiveRepository<SyncBankProjectionRepository, BankProjection, String>(
-        syncBankProjectionRepository,
-        scheduler,
-        transactionTemplate
+    syncBankProjectionRepository,
+    scheduler,
+    transactionTemplate
 )

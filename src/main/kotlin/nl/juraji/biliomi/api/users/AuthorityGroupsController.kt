@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 @RestController
 @RequestMapping("/groups")
 class AuthorityGroupsController(
-        private val authorityGroupsService: AuthorityGroupsService,
+    private val authorityGroupsService: AuthorityGroupsService,
 ) {
 
     @GetMapping
@@ -21,29 +21,29 @@ class AuthorityGroupsController(
     @PostMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
     fun createAuthorityGroup(
-            @RequestBody createAuthorityGroupDto: CreateAuthorityGroupDto,
+        @RequestBody createAuthorityGroupDto: CreateAuthorityGroupDto,
     ): Mono<AuthorityGroup> = authorityGroupsService.createAuthorityGroup(
-            groupName = createAuthorityGroupDto.groupName,
-            authorities = createAuthorityGroupDto.authorities,
+        groupName = createAuthorityGroupDto.groupName,
+        authorities = createAuthorityGroupDto.authorities,
     )
 
     @PostMapping("/copy")
     @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
     fun copyAuthorityGroup(
-            @RequestParam("sourceGroupId") sourceGroupId: String,
-            @RequestParam("newGroupName") newGroupName: String
+        @RequestParam("sourceGroupId") sourceGroupId: String,
+        @RequestParam("newGroupName") newGroupName: String
     ): Mono<AuthorityGroup> = authorityGroupsService.copyAuthorityGroup(sourceGroupId, newGroupName)
 
     @PutMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_UPDATE}')")
     fun updateAuthorityGroup(
-            @RequestBody authorityGroup: AuthorityGroup,
+        @RequestBody authorityGroup: AuthorityGroup,
     ): Mono<AuthorityGroup> = authorityGroupsService.updateAuthorityGroup(authorityGroup)
 
     @PreAuthorize("hasRole('${Authorities.GROUPS_DELETE}')")
     @DeleteMapping("/{authorityGroupId}")
     fun deleteAuthorityGroup(
-            @PathVariable("authorityGroupId") authorityGroupId: String
+        @PathVariable("authorityGroupId") authorityGroupId: String
     ): Mono<AuthorityGroup> = authorityGroupsService.deleteAuthorityGroup(authorityGroupId)
 
     @GetMapping("/permission-list")

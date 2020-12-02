@@ -23,21 +23,21 @@ class SecurityConfiguration {
 
     @Bean
     fun userDetailsService(
-            userPrincipalRepository: UserPrincipalRepository
+        userPrincipalRepository: UserPrincipalRepository
     ): ReactiveUserDetailsService = ReactiveUserDetailsService { username ->
         userPrincipalRepository.findByUsername(username)
-                .map { it as UserDetails }
-                .switchIfEmpty { Mono.error(UsernameNotFoundException("User $username was not found")) }
+            .map { it as UserDetails }
+            .switchIfEmpty { Mono.error(UsernameNotFoundException("User $username was not found")) }
     }
 
     @Bean
     fun securityWebFilterChain(
-            http: ServerHttpSecurity,
+        http: ServerHttpSecurity,
     ): SecurityWebFilterChain = http
-            .csrf().disable()
-            .authorizeExchange()
-            .pathMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
-            .anyExchange().authenticated()
-            .and().httpBasic()
-            .and().build()
+        .csrf().disable()
+        .authorizeExchange()
+        .pathMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
+        .anyExchange().authenticated()
+        .and().httpBasic()
+        .and().build()
 }

@@ -11,12 +11,15 @@ import reactor.core.publisher.Mono
 
 @Service
 class BankService(
-        private val bankProjectionRepository: BankProjectionRepository,
-        private val reactorCommandGateway: ReactorCommandGateway
+    private val bankProjectionRepository: BankProjectionRepository,
+    private val reactorCommandGateway: ReactorCommandGateway
 ) {
     fun getAccountByUserId(userId: String): Mono<BankProjection> = bankProjectionRepository.findById(userId)
     fun getAllAccounts(): Flux<BankProjection> = bankProjectionRepository.findAll()
-    fun addPoints(userId: String, amount: Long): Mono<Unit> = reactorCommandGateway.send(AddBankAccountBalanceCommand(userId, amount))
-    fun takePoints(userId: String, amount: Long): Mono<Unit> = reactorCommandGateway.send(TakeBankAccountBalanceCommand(userId, amount))
+    fun addPoints(userId: String, amount: Long): Mono<Unit> =
+        reactorCommandGateway.send(AddBankAccountBalanceCommand(userId, amount))
+
+    fun takePoints(userId: String, amount: Long): Mono<Unit> =
+        reactorCommandGateway.send(TakeBankAccountBalanceCommand(userId, amount))
 
 }

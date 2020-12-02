@@ -11,8 +11,8 @@ import org.springframework.core.task.TaskExecutor
 
 @Configuration
 class MultiTenantFlywayMigrations(
-        @Qualifier("taskExecutor") private val taskExecutor: TaskExecutor?,
-        private val multiTenancyConfiguration: MultiTenancyConfiguration,
+    @Qualifier("taskExecutor") private val taskExecutor: TaskExecutor?,
+    private val multiTenancyConfiguration: MultiTenancyConfiguration,
 ) : InitializingBean {
 
     override fun afterPropertiesSet() {
@@ -20,35 +20,35 @@ class MultiTenantFlywayMigrations(
         logger.info("Running Flyway migrations for ${tenants.size} tenants...")
 
         tenants
-                .filter { it.flyway != null && it.flyway.isEnabled }
-                .forEach { tenant ->
-                    val flyway: Flyway = createFlywayMigrator(tenant.flyway!!, tenant.datasource)
+            .filter { it.flyway != null && it.flyway.isEnabled }
+            .forEach { tenant ->
+                val flyway: Flyway = createFlywayMigrator(tenant.flyway!!, tenant.datasource)
 
-                    if (taskExecutor != null) {
-                        taskExecutor.execute {
-                            logger.info("Running Flyway for [${tenant.tenantId}] asynchronously")
-                            flyway.migrate()
-                        }
-                    } else {
-                        logger.info("Running flyway for [${tenant.tenantId}] synchronously")
+                if (taskExecutor != null) {
+                    taskExecutor.execute {
+                        logger.info("Running Flyway for [${tenant.tenantId}] asynchronously")
                         flyway.migrate()
                     }
+                } else {
+                    logger.info("Running flyway for [${tenant.tenantId}] synchronously")
+                    flyway.migrate()
                 }
+            }
     }
 
     private fun createFlywayMigrator(
-            flywayProperties: FlywayProperties,
-            datasource: DataSourceProperties,
+        flywayProperties: FlywayProperties,
+        datasource: DataSourceProperties,
     ): Flyway {
         if (flywayProperties.url.isNullOrEmpty()) flywayProperties.url = datasource.url
         if (flywayProperties.user.isNullOrEmpty()) flywayProperties.user = datasource.username
         if (flywayProperties.password.isNullOrEmpty()) flywayProperties.password = datasource.password
 
         return Flyway.configure()
-                .baselineOnMigrate(flywayProperties.isBaselineOnMigrate)
-                .dataSource(flywayProperties.url, flywayProperties.user, flywayProperties.password)
-                .locations(*flywayProperties.locations.toTypedArray())
-                .load()
+            .baselineOnMigrate(flywayProperties.isBaselineOnMigrate)
+            .dataSource(flywayProperties.url, flywayProperties.user, flywayProperties.password)
+            .locations(*flywayProperties.locations.toTypedArray())
+            .load()
     }
 
     companion object : LoggerCompanion(MultiTenantFlywayMigrations::class)

@@ -17,13 +17,13 @@ interface SyncAuthorityGroupRepository : JpaRepository<AuthorityGroup, String> {
 
 @Service
 class AuthorityGroupRepository(
-        syncAuthorityGroupRepository: SyncAuthorityGroupRepository,
-        transactionTemplate: TransactionTemplate,
-        @Qualifier("securityScheduler") scheduler: Scheduler,
+    syncAuthorityGroupRepository: SyncAuthorityGroupRepository,
+    transactionTemplate: TransactionTemplate,
+    @Qualifier("securityScheduler") scheduler: Scheduler,
 ) : ReactiveRepository<SyncAuthorityGroupRepository, AuthorityGroup, String>(
-        syncAuthorityGroupRepository,
-        scheduler,
-        transactionTemplate
+    syncAuthorityGroupRepository,
+    scheduler,
+    transactionTemplate
 ) {
     fun existsByName(groupName: String): Mono<Boolean> = from { existsByName(groupName) }
 }

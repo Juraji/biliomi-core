@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono
 @Order(-2)
 @Configuration
 class RestControllerExceptionHandler(
-        private val objectMapper: ObjectMapper,
+    private val objectMapper: ObjectMapper,
 ) : WebExceptionHandler {
 
     override fun handle(exchange: ServerWebExchange, ex: Throwable): Mono<Void> {
@@ -36,9 +36,9 @@ class RestControllerExceptionHandler(
 
         return if (exchange.request.headers.accept.contains(MediaType.APPLICATION_JSON)) {
             val body: Mono<DataBuffer> = Mono
-                    .just(ApiError(status = status.value(), message = ex.localizedMessage))
-                    .map { objectMapper.writeValueAsBytes(it) }
-                    .map { exchange.response.bufferFactory().wrap(it) }
+                .just(ApiError(status = status.value(), message = ex.localizedMessage))
+                .map { objectMapper.writeValueAsBytes(it) }
+                .map { exchange.response.bufferFactory().wrap(it) }
 
             exchange.response.headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             exchange.response.writeWith(body)
@@ -51,6 +51,6 @@ class RestControllerExceptionHandler(
 }
 
 data class ApiError(
-        val status: Int,
-        val message: String,
+    val status: Int,
+    val message: String,
 )

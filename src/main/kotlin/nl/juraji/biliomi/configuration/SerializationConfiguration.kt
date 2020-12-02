@@ -22,26 +22,26 @@ class SerializationConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     fun objectMapperBuilder(): Jackson2ObjectMapperBuilder {
         return Jackson2ObjectMapperBuilder()
-                .propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
-                .modules(
-                        JavaTimeModule(),
-                        KotlinModule(),
-                )
-                .featuresToEnable(
-                        MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS,
-                        SerializationFeature.WRITE_DATES_WITH_ZONE_ID,
-                        DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE
-                )
-                .featuresToDisable(
-                        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
-                )
+            .propertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
+            .serializationInclusion(JsonInclude.Include.NON_NULL)
+            .modules(
+                JavaTimeModule(),
+                KotlinModule(),
+            )
+            .featuresToEnable(
+                MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS,
+                SerializationFeature.WRITE_DATES_WITH_ZONE_ID,
+                DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE
+            )
+            .featuresToDisable(
+                SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
+            )
     }
 
     @Bean
     @Primary
     fun serializer(objectMapperBuilder: Jackson2ObjectMapperBuilder): Serializer =
-            JacksonSerializer.builder()
-                    .objectMapper(objectMapperBuilder.build())
-                    .build()
+        JacksonSerializer.builder()
+            .objectMapper(objectMapperBuilder.build())
+            .build()
 }

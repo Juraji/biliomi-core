@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 class NumberedThreadFactory(
-        private val baseName: String,
+    private val baseName: String,
 ) : ThreadFactory {
     private val serial = AtomicInteger(0)
 
