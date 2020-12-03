@@ -6,5 +6,6 @@ import org.axonframework.serialization.Revision
 data class BankAccountBalanceUpdatedEvent(
     override val userId: String,
     val previousBalance: Long,
-    val newBalance: Long
+    val newBalance: Long,
+    val message: String? = null
 ) : BankAccountEvent

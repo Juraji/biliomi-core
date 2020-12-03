@@ -1,6 +1,7 @@
 package nl.juraji.biliomi.utils
 
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.MySQLContainer
@@ -9,7 +10,8 @@ import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
 @SpringBootTest
-abstract class DatabaseTest {
+@ActiveProfiles("test")
+abstract class BaseSpringBootTest {
 
     companion object {
 

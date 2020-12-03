@@ -22,6 +22,7 @@ VALUES (@administrators_group_uuid, 'ROLE_GROUPS_READ_ALL'),
        (@administrators_group_uuid, 'ROLE_BANK_READ_ALL'),
        (@administrators_group_uuid, 'ROLE_BANK_ADD_POINTS'),
        (@administrators_group_uuid, 'ROLE_BANK_TAKE_POINTS'),
+       (@administrators_group_uuid, 'ROLE_BANK_START_STOP_INTEREST'),
        (@administrators_group_uuid, 'ROLE_SSE_CONNECT');
 
 insert into AuthorityGroup (groupId, name, protected)

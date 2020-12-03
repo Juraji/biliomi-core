@@ -21,6 +21,7 @@ object Authorities {
     const val BANK_READ_ALL = "ROLE_BANK_READ_ALL"
     const val BANK_ADD_POINTS = "ROLE_BANK_ADD_POINTS"
     const val BANK_TAKE_POINTS = "ROLE_BANK_TAKE_POINTS"
+    const val BANK_START_STOP_INTEREST = "ROLE_BANK_START_STOP_INTEREST"
     const val SSE_CONNECT = "ROLE_SSE_CONNECT"
 
     val all: List<String> by lazy {

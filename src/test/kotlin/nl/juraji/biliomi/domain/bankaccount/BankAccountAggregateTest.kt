@@ -36,8 +36,8 @@ internal class BankAccountAggregateTest {
                 BankAccountCreatedEvent(userId),
                 BankAccountBalanceUpdatedEvent(userId, 0, 25)
             )
-            .`when`(AddBankAccountBalanceCommand(userId, 10))
-            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 35))
+            .`when`(AddBankAccountBalanceCommand(userId, 10, "A Message"))
+            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 35, "A Message"))
     }
 
     @Test
@@ -55,8 +55,8 @@ internal class BankAccountAggregateTest {
                 BankAccountCreatedEvent(userId),
                 BankAccountBalanceUpdatedEvent(userId, 0, 25)
             )
-            .`when`(TakeBankAccountBalanceCommand(userId, 10))
-            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 15))
+            .`when`(TakeBankAccountBalanceCommand(userId, 10, "A message"))
+            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 15, "A message"))
     }
 
     @Test

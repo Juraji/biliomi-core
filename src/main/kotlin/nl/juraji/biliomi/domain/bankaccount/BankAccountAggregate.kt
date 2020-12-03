@@ -1,12 +1,7 @@
 package nl.juraji.biliomi.domain.bankaccount
 
-import nl.juraji.biliomi.domain.bankaccount.commands.AddBankAccountBalanceCommand
-import nl.juraji.biliomi.domain.bankaccount.commands.CreateBankAccountCommand
-import nl.juraji.biliomi.domain.bankaccount.commands.DeleteBankAccountCommand
-import nl.juraji.biliomi.domain.bankaccount.commands.TakeBankAccountBalanceCommand
-import nl.juraji.biliomi.domain.bankaccount.events.BankAccountBalanceUpdatedEvent
-import nl.juraji.biliomi.domain.bankaccount.events.BankAccountCreatedEvent
-import nl.juraji.biliomi.domain.bankaccount.events.BankAccountDeletedEvent
+import nl.juraji.biliomi.domain.bankaccount.commands.*
+import nl.juraji.biliomi.domain.bankaccount.events.*
 import nl.juraji.reactor.validations.validate
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
@@ -20,6 +15,7 @@ class BankAccountAggregate() {
     @AggregateIdentifier
     private lateinit var userId: String
     private var balance: Long = 0
+    private var interestStarted: Boolean = false
 
     @CommandHandler
     constructor(cmd: CreateBankAccountCommand) : this() {
@@ -36,7 +32,8 @@ class BankAccountAggregate() {
             BankAccountBalanceUpdatedEvent(
                 userId = userId,
                 previousBalance = balance,
-                newBalance = balance + cmd.amount
+                newBalance = balance + cmd.amount,
+                message = cmd.message
             )
         )
     }
@@ -52,9 +49,28 @@ class BankAccountAggregate() {
             BankAccountBalanceUpdatedEvent(
                 userId = userId,
                 previousBalance = balance,
-                newBalance = balance - cmd.amount
+                newBalance = balance - cmd.amount,
+                message = cmd.message
             )
         )
+    }
+
+    @CommandHandler
+    fun handle(cmd: StartInterestCommand) {
+        validate {
+            isFalse(interestStarted) { "Interest has already been started for $userId" }
+        }
+
+        AggregateLifecycle.apply(InterestStartedEvent(userId))
+    }
+
+    @CommandHandler
+    fun handle(cmd: EndInterestCommand) {
+        validate {
+            isTrue(interestStarted) { "Interest has not yey been started for $userId" }
+        }
+
+        AggregateLifecycle.apply(InterestEndedEvent(userId))
     }
 
     @CommandHandler
@@ -77,5 +93,15 @@ class BankAccountAggregate() {
     @EventSourcingHandler
     fun on(e: BankAccountDeletedEvent) {
         AggregateLifecycle.markDeleted()
+    }
+
+    @EventSourcingHandler
+    fun on(e: InterestStartedEvent) {
+        interestStarted = true
+    }
+
+    @EventSourcingHandler
+    fun on(e: InterestEndedEvent) {
+        interestStarted = false
     }
 }

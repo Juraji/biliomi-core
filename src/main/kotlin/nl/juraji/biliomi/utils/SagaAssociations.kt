@@ -14,13 +14,16 @@ object SagaAssociations {
     fun getAssociatedValues(associationKey: String): List<String> =
         getAssociations().filter { it.key == associationKey }.map { it.value }
 
-    fun <T> getAssociatedValues(associationKey: String, mapper: (String) -> T): List<T> =
+    fun <T : Any> getAssociatedValues(associationKey: String, mapper: (String) -> T): List<T> =
         getAssociatedValues(associationKey).map(mapper)
 
     fun getAssociatedValue(associationKey: String): String? =
         getAssociations().firstOrNull { it.key == associationKey }?.value
 
-    fun <T> getAssociatedValue(associationKey: String, mapper: (String) -> T): T? =
+    fun getAssociatedValueNonNull(associationKey: String): String =
+        getAssociations().first { it.key == associationKey }.value
+
+    fun <T : Any> getAssociatedValue(associationKey: String, mapper: (String) -> T): T? =
         getAssociatedValue(associationKey)?.let(mapper)
 
     fun associateWith(associationKey: String, associationValue: String) =
