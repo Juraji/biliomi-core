@@ -39,6 +39,7 @@ class UserAggregate() {
     @CommandHandler
     fun handle(cmd: AddUserToAuthorityGroupCommand) {
         validate {
+            isNotBlank(cmd.groupId) { "Group id may not be empty" }
             isFalse(groupIds.contains(cmd.groupId)) { "User $username is already in group with id ${cmd.groupId}" }
         }
 
@@ -53,6 +54,7 @@ class UserAggregate() {
     @CommandHandler
     fun handle(cmd: RemoveUserFromAuthorityGroupCommand) {
         validate {
+            isNotBlank(cmd.groupId) { "Group id may not be empty" }
             isTrue(groupIds.contains(cmd.groupId)) { "User $username is not in group with id ${cmd.groupId}" }
         }
 
@@ -68,6 +70,7 @@ class UserAggregate() {
     fun handle(cmd: SetUserDisplayNameCommand) {
         validate {
             isNotBlank(cmd.displayName) { "Display name may not be empty" }
+            isFalse(cmd.displayName == displayName) { "Display name is the same as the current display name" }
         }
 
         AggregateLifecycle.apply(
