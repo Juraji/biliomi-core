@@ -56,20 +56,24 @@ class InstallService(
     }
 
     private fun installAdminGroupAndUser() {
+        val adminGroupName = "Administrators"
+        val adminUsernamePassword = "admin"
+        val adminDisplayName = "Administrator"
+
         val administratorGroupId: Mono<String> = commandGateway.send(
             CreateAuthorityGroupCommand(
                 groupId = uuid(),
-                groupName = "Administrators",
-                protected = true,
-                authorities = Authorities.all.toSet()
+                groupName = adminGroupName,
+                authorities = Authorities.all.toSet(),
+                protected = true
             )
         )
 
         val administratorUsername: Mono<String> = commandGateway.send(
             CreateUserCommand(
-                username = "admin",
-                displayName = "Administrator",
-                passwordHash = passwordEncoder.encode("admin")
+                username = adminUsernamePassword,
+                displayName = adminDisplayName,
+                passwordHash = passwordEncoder.encode(adminUsernamePassword)
             )
         )
 
@@ -82,28 +86,32 @@ class InstallService(
                     )
                 ).then(Mono.just(username to groupId))
             }
-            .doOnNext { (u, g) ->
-                logger.info("Created authority group \"Administrators\" with id $g")
-                logger.info("Created user \"admin\" with password \"admin\" with id $u and added it to group \"Administrators\"")
+            .doOnNext { (username, groupId) ->
+                logger.info("Created authority group \"$adminGroupName\" with id $groupId")
+                logger.info("Created user \"$adminUsernamePassword\" with password \"$adminUsernamePassword\" with id" +
+                        " $username and added it to group \"$adminGroupName\"")
             }
             .block()
     }
 
     private fun installUsersGroup() {
+        val usersGroupName = "Users"
+        val usersGroupAuthorities = setOf(
+            Authorities.USERS_READ_ME,
+            Authorities.USERS_UPDATE_ME_DISPLAY_NAME,
+            Authorities.USERS_UPDATE_ME_PASSWORD,
+            Authorities.BANK_READ_ME,
+        )
+
         commandGateway
             .send<String>(
                 CreateAuthorityGroupCommand(
                     groupId = uuid(),
-                    groupName = "Users",
-                    authorities = setOf(
-                        Authorities.USERS_READ_ME,
-                        Authorities.USERS_UPDATE_ME_USERNAME,
-                        Authorities.USERS_UPDATE_ME_PASSWORD,
-                        Authorities.BANK_READ_ME,
-                    )
+                    groupName = usersGroupName,
+                    authorities = usersGroupAuthorities
                 )
             )
-            .doOnNext { logger.info("Created authority group \"Users\" with id $it ") }
+            .doOnNext { logger.info("Created authority group \"$usersGroupName\" with id $it ") }
             .block()
     }
 

@@ -1,10 +1,9 @@
 package nl.juraji.biliomi.api.users
 
 import nl.juraji.biliomi.configuration.security.Authorities
+import nl.juraji.biliomi.domain.user.commands.UpdateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.CreateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.DeleteAuthorityGroupCommand
-import nl.juraji.biliomi.domain.user.commands.SetAuthorityGroupAuthoritiesCommand
-import nl.juraji.biliomi.domain.user.commands.SetAuthorityGroupNameCommand
 import nl.juraji.biliomi.projections.AuthorityGroupProjection
 import nl.juraji.biliomi.projections.repositories.AuthorityGroupProjectionRepository
 import nl.juraji.biliomi.utils.extensions.uuid
@@ -58,20 +57,13 @@ class AuthorityGroupsService(
             }
         }
         .flatMap {
-            commandGateway.send<Unit>(
-                SetAuthorityGroupNameCommand(
+            commandGateway.send(
+                UpdateAuthorityGroupCommand(
                     groupId = it.groupId,
-                    groupName = update.groupName
+                    groupName = update.groupName,
+                    authorities = update.authorities
                 )
             )
-                .then(
-                    commandGateway.send(
-                        SetAuthorityGroupAuthoritiesCommand(
-                            groupId = it.groupId,
-                            authorities = update.authorities
-                        )
-                    )
-                )
         }
 
     fun deleteAuthorityGroup(groupId: String): Mono<Unit> = commandGateway.send(DeleteAuthorityGroupCommand(groupId))

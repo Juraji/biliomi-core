@@ -3,8 +3,7 @@ package nl.juraji.biliomi.domain.user
 import nl.juraji.biliomi.configuration.security.Authorities
 import nl.juraji.biliomi.domain.user.commands.CreateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.DeleteAuthorityGroupCommand
-import nl.juraji.biliomi.domain.user.commands.SetAuthorityGroupAuthoritiesCommand
-import nl.juraji.biliomi.domain.user.commands.SetAuthorityGroupNameCommand
+import nl.juraji.biliomi.domain.user.commands.UpdateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.events.AuthorityGroupCreatedEvent
 import nl.juraji.biliomi.domain.user.events.AuthorityGroupDeletedEvent
 import nl.juraji.biliomi.domain.user.events.AuthorityGroupUpdatedEvent
@@ -38,41 +37,30 @@ class AuthorityGroupAggregate() {
             AuthorityGroupCreatedEvent(
                 groupId = cmd.groupId,
                 groupName = cmd.groupName,
-                protected = cmd.protected,
                 authorities = cmd.authorities,
+                protected = cmd.protected,
             )
         )
     }
 
     @CommandHandler
-    fun handle(cmd: SetAuthorityGroupNameCommand) {
+    fun handle(cmd: UpdateAuthorityGroupCommand) {
         validate {
             isNotBlank(cmd.groupName) { "Group name should not be blank" }
-            isFalse(cmd.groupName == groupName) { "Group name did not change" }
+            isFalse(cmd.groupName == groupName && cmd.authorities == authorities) { "No properties were updated" }
+
+            unless(cmd.authorities == authorities) {
+                isFalse(protected) { "Authority group $groupName is protected and may not have its authorities updated" }
+                isNotEmpty(cmd.authorities) { "Group authorities may not be empty" }
+                isTrue(cmd.authorities.all(String::isNotBlank)) { "Group authorities may not contain empty values" }
+                isTrue(cmd.authorities.all(Authorities.all::contains)) { "Unknown entry found in authorities" }
+            }
         }
 
         AggregateLifecycle.apply(
             AuthorityGroupUpdatedEvent(
                 groupId = groupId,
                 groupName = cmd.groupName,
-                authorities = authorities
-            )
-        )
-    }
-
-    @CommandHandler
-    fun handle(cmd: SetAuthorityGroupAuthoritiesCommand) {
-        validate {
-            isFalse(protected) { "Authority group $groupName is protected and may not have its authorities updated" }
-            isNotEmpty(cmd.authorities) { "Group authorities may not be empty" }
-            isTrue(cmd.authorities.all(String::isNotBlank)) { "Group authorities may not contain empty values" }
-            isTrue(cmd.authorities.all(Authorities.all::contains)) { "Unknown entry found in authorities" }
-        }
-
-        AggregateLifecycle.apply(
-            AuthorityGroupUpdatedEvent(
-                groupId = groupId,
-                groupName = groupName,
                 authorities = cmd.authorities
             )
         )

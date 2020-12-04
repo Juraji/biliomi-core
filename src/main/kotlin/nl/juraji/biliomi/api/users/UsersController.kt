@@ -22,7 +22,7 @@ class UsersController(
     ): Mono<UserProjection> = usersService.findUser(principal.username)
 
     @PutMapping("/me/display-name")
-    @PreAuthorize("hasRole('${Authorities.USERS_UPDATE_ME_USERNAME}')")
+    @PreAuthorize("hasRole('${Authorities.USERS_UPDATE_ME_DISPLAY_NAME}')")
     fun updateMyUsername(
         @AuthenticationPrincipal principal: UserDetails,
         @RequestParam("newDisplayName") newDisplayName: String
