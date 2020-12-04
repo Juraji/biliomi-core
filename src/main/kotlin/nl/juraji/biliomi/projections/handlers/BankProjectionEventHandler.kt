@@ -19,7 +19,7 @@ class BankProjectionEventHandler(
     @EventHandler
     fun on(e: BankAccountCreatedEvent) {
         bankProjectionRepository
-            .save(BankProjection(accountId = e.accountId, userId = e.userId))
+            .save(BankProjection(accountId = e.accountId, username = e.username))
             .block()
     }
 

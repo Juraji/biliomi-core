@@ -14,7 +14,7 @@ class BankAccountAggregate() {
 
     @AggregateIdentifier
     private lateinit var accountId: String
-    private lateinit var userId: String
+    private lateinit var username: String
     private var balance: Long = 0
     private var interestStarted: Boolean = false
 
@@ -23,7 +23,7 @@ class BankAccountAggregate() {
         AggregateLifecycle.apply(
             BankAccountCreatedEvent(
                 accountId = cmd.accountId,
-                userId = cmd.userId
+                username = cmd.username
             )
         )
     }
@@ -64,7 +64,7 @@ class BankAccountAggregate() {
     @CommandHandler
     fun handle(cmd: StartInterestCommand) {
         validate {
-            isFalse(interestStarted) { "Interest has already been started for $userId" }
+            isFalse(interestStarted) { "Interest has already been started for $username" }
         }
 
         AggregateLifecycle.apply(InterestStartedEvent(accountId))
@@ -73,7 +73,7 @@ class BankAccountAggregate() {
     @CommandHandler
     fun handle(cmd: EndInterestCommand) {
         validate {
-            isTrue(interestStarted) { "Interest has not yey been started for $userId" }
+            isTrue(interestStarted) { "Interest has not yey been started for $username" }
         }
 
         AggregateLifecycle.apply(InterestEndedEvent(accountId))
@@ -89,7 +89,7 @@ class BankAccountAggregate() {
     @EventSourcingHandler
     fun on(e: BankAccountCreatedEvent) {
         accountId = e.accountId
-        userId = e.userId
+        username = e.username
     }
 
     @EventSourcingHandler

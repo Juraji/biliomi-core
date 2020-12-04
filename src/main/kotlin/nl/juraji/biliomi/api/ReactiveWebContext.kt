@@ -1,7 +1,8 @@
 package nl.juraji.biliomi.api
 
-import nl.juraji.biliomi.projections.UserPrincipal
 import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
@@ -19,16 +20,15 @@ object ReactiveWebContext {
             .filter { it.hasKey(ServerWebExchange::class.java) }
             .map { it.get(ServerWebExchange::class.java) }
 
-    fun getCurrentUser(): Mono<UserPrincipal> = getSecurityContext()
-        .map { it.authentication.principal as UserPrincipal }
+    fun getCurrentUser(): Mono<UserDetails> = getSecurityContext()
+        .map { it.authentication.principal as UserDetails }
         .switchIfEmpty {
-            UserPrincipal(
-                userId = "SYSTEM",
-                authorities = emptyList(),
-                username = "System",
-                password = "",
-                enabled = true,
-            ).toMono()
+            User
+                .withUsername("SYSTEM")
+                .password("")
+                .authorities(emptyList())
+                .build()
+                .toMono()
         }
 
 }

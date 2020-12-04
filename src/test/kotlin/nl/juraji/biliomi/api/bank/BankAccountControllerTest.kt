@@ -44,10 +44,10 @@ internal class BankAccountControllerTest {
     @Test
     @WithMockPrincipal(roles = [Authorities.BANK_READ_ME])
     internal fun `should be able to get own bank account`() {
-        val userId = ReactiveWebContext.getCurrentUser().map { it.userId }.block()!!
-        val expected = BankProjection(uuid(), userId, 150)
+        val username = ReactiveWebContext.getCurrentUser().map { it.username }.block()!!
+        val expected = BankProjection(uuid(), username, 150)
 
-        every { bankAccountService.getAccountByUserId(userId) } returnsMonoOf expected
+        every { bankAccountService.getAccountByUsername(username) } returnsMonoOf expected
 
         val result = webTestClient
             .mutateWith(csrf())

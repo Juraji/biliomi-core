@@ -1,6 +1,6 @@
 package nl.juraji.biliomi.domain.user.events
 
 data class UserRemovedFromAuthorityGroupEvent(
-    override val userId: String,
+    override val username: String,
     val groupId: String
 ) : UserEvent

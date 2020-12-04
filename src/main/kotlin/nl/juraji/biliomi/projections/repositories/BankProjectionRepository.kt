@@ -13,7 +13,7 @@ import java.util.*
 
 @Repository
 interface SyncBankProjectionRepository : JpaRepository<BankProjection, String> {
-    fun findByUserId(userId: String): Optional<BankProjection>
+    fun findByUsername(username: String): Optional<BankProjection>
 }
 
 @Service
@@ -26,5 +26,5 @@ class BankProjectionRepository(
     scheduler,
     transactionTemplate
 ) {
-    fun findByUserId(userId: String): Mono<BankProjection> = fromOptional { findByUserId(userId) }
+    fun findByUsername(username: String): Mono<BankProjection> = fromOptional { findByUsername(username) }
 }

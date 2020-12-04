@@ -13,18 +13,15 @@ create table AuthorityGroupProjection_authorities
 
 create table UserProjection
 (
-    userId       varchar(36) not null,
+    username       varchar(255) not null,
     passwordHash varchar(255),
-    username     varchar(255),
-    primary key (userId)
+    displayName     varchar(255),
+    primary key (username)
 ) engine = InnoDB;
 
 create table UserProjection_AuthorityGroupProjection
 (
-    UserProjection_userId   varchar(255) not null,
+    UserProjection_username   varchar(255) not null,
     authorityGroups_groupId varchar(255) not null,
-    primary key (UserProjection_userId, authorityGroups_groupId)
+    primary key (UserProjection_username, authorityGroups_groupId)
 ) engine = InnoDB;
-
-alter table UserProjection
-    add constraint UK_16qtpgaoa1rea8awxdav5hfpm unique (username);

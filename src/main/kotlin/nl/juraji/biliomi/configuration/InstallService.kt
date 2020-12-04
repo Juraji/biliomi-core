@@ -65,22 +65,22 @@ class InstallService(
             )
         )
 
-        val administratorUserId: Mono<String> = commandGateway.send(
+        val administratorUsername: Mono<String> = commandGateway.send(
             CreateUserCommand(
-                userId = uuid(),
                 username = "admin",
+                displayName = "Administrator",
                 passwordHash = passwordEncoder.encode("admin")
             )
         )
 
-        Mono.zip(administratorUserId, administratorGroupId)
-            .flatMap { (userId, groupId) ->
+        Mono.zip(administratorUsername, administratorGroupId)
+            .flatMap { (username, groupId) ->
                 commandGateway.send<Unit>(
                     AddUserToAuthorityGroupCommand(
-                        userId = userId,
+                        username = username,
                         groupId = groupId
                     )
-                ).then(Mono.just(userId to groupId))
+                ).then(Mono.just(username to groupId))
             }
             .doOnNext { (u, g) ->
                 logger.info("Created authority group \"Administrators\" with id $g")

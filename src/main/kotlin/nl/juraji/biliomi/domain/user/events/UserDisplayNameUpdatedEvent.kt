@@ -1,6 +1,6 @@
 package nl.juraji.biliomi.domain.user.events
 
-data class UserAddedToAuthorityGroupEvent(
+data class UserDisplayNameUpdatedEvent(
     override val username: String,
-    val groupId: String
+    val displayName: String,
 ) : UserEvent

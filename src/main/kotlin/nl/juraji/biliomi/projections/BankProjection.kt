@@ -6,6 +6,6 @@ import javax.persistence.Id
 @Entity
 data class BankProjection(
     @Id val accountId: String,
-    val userId: String,
+    val username: String,
     val balance: Long = 0
 )

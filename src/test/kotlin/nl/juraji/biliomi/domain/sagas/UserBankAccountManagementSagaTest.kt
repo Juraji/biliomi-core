@@ -13,7 +13,6 @@ import nl.juraji.biliomi.domain.bankaccount.events.InterestEndedEvent
 import nl.juraji.biliomi.domain.bankaccount.events.InterestStartedEvent
 import nl.juraji.biliomi.domain.user.events.UserCreatedEvent
 import nl.juraji.biliomi.domain.user.events.UserDeletedEvent
-import nl.juraji.biliomi.utils.extensions.uuid
 import nl.juraji.biliomi.utils.returnsEmptyMono
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.axonframework.test.saga.SagaTestFixture
@@ -25,9 +24,8 @@ import java.time.Duration
 @ExtendWith(MockKExtension::class)
 internal class UserBankAccountManagementSagaTest {
     private lateinit var fixture: SagaTestFixture<UserBankAccountManagementSaga>
-    private val userId = uuid()
-    private val accountId = UserBankAccountManagementSaga.generateAccountId(userId)
-    private val username = "MockUser"
+    private val username = "mock-user"
+    private val accountId = UserBankAccountManagementSaga.generateAccountId(username)
 
     @MockK
     private lateinit var commandGateway: ReactorCommandGateway
@@ -47,27 +45,27 @@ internal class UserBankAccountManagementSagaTest {
     @Test
     internal fun `should create bank account for newly created User`() {
         fixture.givenNoPriorActivity()
-            .whenPublishingA(UserCreatedEvent(userId, username))
-            .expectDispatchedCommands(CreateBankAccountCommand(accountId, userId))
-            .expectAssociationWith(UserBankAccountManagementSaga.ASSOC_USER, userId)
+            .whenPublishingA(UserCreatedEvent(username, username))
+            .expectDispatchedCommands(CreateBankAccountCommand(accountId, username))
+            .expectAssociationWith(UserBankAccountManagementSaga.ASSOC_USER, username)
             .expectAssociationWith(UserBankAccountManagementSaga.ASSOC_ACCOUNT, accountId)
     }
 
     @Test
     internal fun `should delete bank account on User deleted event`() {
         fixture
-            .givenAPublished(UserCreatedEvent(userId, username))
-            .andThenAPublished(BankAccountCreatedEvent(accountId, userId))
-            .whenPublishingA(UserDeletedEvent(userId))
+            .givenAPublished(UserCreatedEvent(username, username))
+            .andThenAPublished(BankAccountCreatedEvent(accountId, username))
+            .whenPublishingA(UserDeletedEvent(username))
             .expectDispatchedCommands(DeleteBankAccountCommand(accountId))
     }
 
     @Test
     internal fun `should end when user bank account was deleted`() {
         fixture
-            .givenAPublished(UserCreatedEvent(userId, username))
-            .andThenAPublished(BankAccountCreatedEvent(accountId, userId))
-            .andThenAPublished(UserDeletedEvent(userId))
+            .givenAPublished(UserCreatedEvent(username, username))
+            .andThenAPublished(BankAccountCreatedEvent(accountId, username))
+            .andThenAPublished(UserDeletedEvent(username))
             .whenPublishingA(BankAccountDeletedEvent(accountId))
             .expectActiveSagas(0)
     }
@@ -76,8 +74,8 @@ internal class UserBankAccountManagementSagaTest {
     internal fun `should schedule interest event after on InterestStartedEvent`() {
         every { configuration.interestRateDuration } returns Duration.ofMinutes(5)
 
-        fixture.givenAPublished(UserCreatedEvent(userId, username))
-            .andThenAPublished(BankAccountCreatedEvent(accountId, userId))
+        fixture.givenAPublished(UserCreatedEvent(username, username))
+            .andThenAPublished(BankAccountCreatedEvent(accountId, username))
             .whenPublishingA(InterestStartedEvent(accountId))
             .expectScheduledDeadlineWithName(
                 Duration.ofMinutes(5),
@@ -90,8 +88,8 @@ internal class UserBankAccountManagementSagaTest {
         every { configuration.interestRateDuration } returns Duration.ofMinutes(5)
         every { configuration.interestAmount } returns 10
 
-        fixture.givenAPublished(UserCreatedEvent(userId, username))
-            .andThenAPublished(BankAccountCreatedEvent(accountId, userId))
+        fixture.givenAPublished(UserCreatedEvent(username, username))
+            .andThenAPublished(BankAccountCreatedEvent(accountId, username))
             .andThenAPublished(InterestStartedEvent(accountId))
             .andThenTimeElapses(Duration.ofMinutes(3))
             .whenPublishingA(InterestEndedEvent(accountId))
@@ -103,8 +101,8 @@ internal class UserBankAccountManagementSagaTest {
         every { configuration.interestRateDuration } returns Duration.ofMinutes(5)
         every { configuration.interestAmount } returns 10
 
-        fixture.givenAPublished(UserCreatedEvent(userId, username))
-            .andThenAPublished(BankAccountCreatedEvent(accountId, userId))
+        fixture.givenAPublished(UserCreatedEvent(username, username))
+            .andThenAPublished(BankAccountCreatedEvent(accountId, username))
             .andThenAPublished(InterestStartedEvent(accountId))
             .whenTimeElapses(Duration.ofMinutes(10))
             .expectDispatchedCommands(

@@ -13,15 +13,15 @@ import org.axonframework.spring.stereotype.Aggregate
 class UserAggregate() {
 
     @AggregateIdentifier
-    private lateinit var userId: String
     private lateinit var username: String
+    private lateinit var displayName: String
     private var groupIds: Set<String> = emptySet()
 
     @CommandHandler
     constructor(cmd: CreateUserCommand) : this() {
         validate {
-            isNotBlank(cmd.userId) { "User id may not be empty" }
             isNotBlank(cmd.username) { "Username may not be empty" }
+            isNotBlank(cmd.displayName) { "Display name may not be empty" }
             unless(cmd.passwordHash == null) {
                 isNotBlank(cmd.passwordHash) { "Password hash may not be empty" }
             }
@@ -29,8 +29,8 @@ class UserAggregate() {
 
         AggregateLifecycle.apply(
             UserCreatedEvent(
-                userId = cmd.userId,
                 username = cmd.username,
+                displayName = cmd.displayName,
                 passwordHash = cmd.passwordHash
             )
         )
@@ -44,7 +44,7 @@ class UserAggregate() {
 
         AggregateLifecycle.apply(
             UserAddedToAuthorityGroupEvent(
-                userId = userId,
+                username = username,
                 groupId = cmd.groupId
             )
         )
@@ -58,22 +58,22 @@ class UserAggregate() {
 
         AggregateLifecycle.apply(
             UserRemovedFromAuthorityGroupEvent(
-                userId = userId,
+                username = username,
                 groupId = cmd.groupId
             )
         )
     }
 
     @CommandHandler
-    fun handle(cmd: SetUserUsernameCommand) {
+    fun handle(cmd: SetUserDisplayNameCommand) {
         validate {
-            isNotBlank(cmd.username) { "Username may not be empty" }
+            isNotBlank(cmd.displayName) { "Display name may not be empty" }
         }
 
         AggregateLifecycle.apply(
-            UserUsernameUpdatedEvent(
-                userId = userId,
-                username = cmd.username,
+            UserDisplayNameUpdatedEvent(
+                username = username,
+                displayName = cmd.displayName,
             )
         )
     }
@@ -86,7 +86,7 @@ class UserAggregate() {
 
         AggregateLifecycle.apply(
             UserPasswordUpdatedEvent(
-                userId = userId,
+                username = username,
                 passwordHash = cmd.passwordHash
             )
         )
@@ -94,13 +94,13 @@ class UserAggregate() {
 
     @CommandHandler
     fun handle(cmd: DeleteUserCommand) {
-        AggregateLifecycle.apply(UserDeletedEvent(userId = cmd.userId))
+        AggregateLifecycle.apply(UserDeletedEvent(username = cmd.username))
     }
 
     @EventSourcingHandler
     fun on(e: UserCreatedEvent) {
-        this.userId = e.userId
         this.username = e.username
+        this.displayName = e.displayName
     }
 
     @EventSourcingHandler
@@ -114,8 +114,8 @@ class UserAggregate() {
     }
 
     @EventSourcingHandler
-    fun on(e: UserUsernameUpdatedEvent) {
-        this.username = e.username
+    fun on(e: UserDisplayNameUpdatedEvent) {
+        this.displayName = e.displayName
     }
 
     @EventSourcingHandler

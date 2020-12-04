@@ -1,6 +1,6 @@
 package nl.juraji.biliomi.domain.user.commands
 
 data class RemoveUserFromAuthorityGroupCommand(
-    override val userId: String,
+    override val username: String,
     val groupId: String
-) : UserCommand(userId)
+) : UserCommand(username)

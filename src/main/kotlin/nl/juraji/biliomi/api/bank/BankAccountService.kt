@@ -16,7 +16,7 @@ class BankAccountService(
     private val bankProjectionRepository: BankProjectionRepository,
     private val reactorCommandGateway: ReactorCommandGateway
 ) {
-    fun getAccountByUserId(userId: String): Mono<BankProjection> = bankProjectionRepository.findByUserId(userId)
+    fun getAccountByUsername(username: String): Mono<BankProjection> = bankProjectionRepository.findByUsername(username)
     fun getAllAccounts(): Flux<BankProjection> = bankProjectionRepository.findAll()
     fun addPoints(accountId: String, amount: Long, message: String?): Mono<Unit> =
         reactorCommandGateway.send(AddBankAccountBalanceCommand(accountId, amount, message))

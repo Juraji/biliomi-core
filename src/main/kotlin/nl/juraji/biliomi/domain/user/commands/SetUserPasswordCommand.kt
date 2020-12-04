@@ -1,7 +1,7 @@
 package nl.juraji.biliomi.domain.user.commands
 
 data class SetUserPasswordCommand(
-    override val userId: String,
+    override val username: String,
     val passwordHash: String
-) : UserCommand(userId)
+) : UserCommand(username)
 

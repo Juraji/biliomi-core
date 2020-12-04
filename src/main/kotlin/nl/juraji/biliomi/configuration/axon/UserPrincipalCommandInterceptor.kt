@@ -10,14 +10,16 @@ class UserPrincipalCommandInterceptor : ReactorMessageDispatchInterceptor<Comman
         .zip(message, ReactiveWebContext.getCurrentUser()) { cmd, principal ->
             cmd.andMetaData(
                 mapOf(
-                    USER_ID to principal.userId,
                     USERNAME to principal.username,
+                    ACCOUNT_ENABLED to principal.isEnabled,
+                    AUTHORITIES to principal.authorities.map { it.authority }
                 )
             )
         }
 
     companion object {
-        const val USER_ID = "principal_user_id"
         const val USERNAME = "principal_username"
+        const val ACCOUNT_ENABLED = "principal_account_enabled"
+        const val AUTHORITIES = "principal_authorities"
     }
 }

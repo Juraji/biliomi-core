@@ -19,8 +19,8 @@ class UserProjectionEventHandler(
     @EventHandler
     fun on(e: UserCreatedEvent) {
         val entity = UserProjection(
-            userId = e.userId,
             username = e.username,
+            displayName = e.displayName,
             passwordHash = e.passwordHash
         )
 
@@ -30,16 +30,20 @@ class UserProjectionEventHandler(
     }
 
     @EventHandler
-    fun on(e: UserUsernameUpdatedEvent) {
+    fun on(e: UserDisplayNameUpdatedEvent) {
         userProjectionRepository
-            .update(e.userId) { copy(username = e.username) }
+            .update(e.username) {
+                copy(displayName = e.displayName)
+            }
             .block()
     }
 
     @EventHandler
     fun on(e: UserPasswordUpdatedEvent) {
         userProjectionRepository
-            .update(e.userId) { copy(passwordHash = e.passwordHash) }
+            .update(e.username) {
+                copy(passwordHash = e.passwordHash)
+            }
             .block()
     }
 
@@ -48,7 +52,7 @@ class UserProjectionEventHandler(
         authorityGroupProjectionRepository
             .findById(e.groupId)
             .flatMap { group ->
-                userProjectionRepository.update(e.userId) {
+                userProjectionRepository.update(e.username) {
                     copy(authorityGroups = authorityGroups.plus(group))
                 }
             }
@@ -58,7 +62,7 @@ class UserProjectionEventHandler(
     @EventHandler
     fun on(e: UserRemovedFromAuthorityGroupEvent) {
         userProjectionRepository
-            .update(e.userId) {
+            .update(e.username) {
                 copy(authorityGroups = authorityGroups.filter { it.groupId == e.groupId }.toSet())
             }
             .block()
@@ -67,7 +71,7 @@ class UserProjectionEventHandler(
     @EventHandler
     fun on(e: UserDeletedEvent) {
         userProjectionRepository
-            .deleteById(e.userId)
+            .deleteById(e.username)
             .block()
     }
 }

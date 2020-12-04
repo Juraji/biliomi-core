@@ -25,6 +25,7 @@ import org.axonframework.modelling.saga.StartSaga
 import org.axonframework.serialization.Revision
 import org.axonframework.spring.stereotype.Saga
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Duration
 
 
 @Saga
@@ -47,21 +48,21 @@ class UserBankAccountManagementSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = ASSOC_USER)
     fun on(e: UserCreatedEvent) {
-        logger.info("Creating bank for user ${e.userId}")
-        val accountId = generateAccountId(e.userId)
+        logger.info("Creating bank for user ${e.username}")
+        val accountId = generateAccountId(e.username)
 
         SagaLifecycle.associateWith(ASSOC_ACCOUNT, accountId)
         commandGateway.send<Unit>(
             CreateBankAccountCommand(
                 accountId = accountId,
-                userId = e.userId
+                username = e.username
             )
         ).block()
     }
 
     @SagaEventHandler(associationProperty = ASSOC_ACCOUNT)
     fun on(e: BankAccountCreatedEvent) {
-        logger.info("Bank created for user ${e.accountId}")
+        logger.info("Bank created for user ${e.username}")
     }
 
     @SagaEventHandler(associationProperty = ASSOC_ACCOUNT)
@@ -85,7 +86,7 @@ class UserBankAccountManagementSaga {
             AddBankAccountBalanceCommand(
                 accountId = accountId,
                 amount = configuration.interestAmount,
-                message = "Interest after ${configuration.interestRateDuration}: ${configuration.interestAmount}"
+                message = "Bank account interest"
             )
         ).block()
 
@@ -98,7 +99,7 @@ class UserBankAccountManagementSaga {
 
     @SagaEventHandler(associationProperty = ASSOC_USER)
     fun on(e: UserDeletedEvent) {
-        logger.info("Deleting bank for user ${e.userId}")
+        logger.info("Deleting bank for user ${e.username}")
         val accountId = SagaAssociations.getAssociatedValueNonNull(ASSOC_ACCOUNT)
         commandGateway.send<Unit>(DeleteBankAccountCommand(accountId = accountId)).block()
     }
@@ -113,9 +114,9 @@ class UserBankAccountManagementSaga {
     companion object : LoggerCompanion(UserBankAccountManagementSaga::class) {
         private const val ACCOUNT_ID_SUFFIX = "bank-account"
         const val ASSOC_ACCOUNT = "accountId"
-        const val ASSOC_USER = "userId"
+        const val ASSOC_USER = "username"
         const val INTEREST_DEADLINE = "interest-deadline"
 
-        fun generateAccountId(userId: String) = uuid(userId, ACCOUNT_ID_SUFFIX)
+        fun generateAccountId(username: String) = uuid(username, ACCOUNT_ID_SUFFIX)
     }
 }

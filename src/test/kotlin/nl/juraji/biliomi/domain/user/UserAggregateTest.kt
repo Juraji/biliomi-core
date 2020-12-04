@@ -4,15 +4,14 @@ import nl.juraji.biliomi.domain.user.commands.CreateUserCommand
 import nl.juraji.biliomi.domain.user.commands.DeleteUserCommand
 import nl.juraji.biliomi.domain.user.events.UserCreatedEvent
 import nl.juraji.biliomi.domain.user.events.UserDeletedEvent
-import nl.juraji.biliomi.utils.extensions.uuid
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UserAggregateTest {
     private lateinit var fixture: AggregateTestFixture<UserAggregate>
-    private val userId = uuid()
-    private val username = "Mock user"
+    private val username = "mock-user"
+    private val displayName = "Mock user"
 
     @BeforeEach
     fun setUp() {
@@ -22,16 +21,16 @@ internal class UserAggregateTest {
     @Test
     internal fun `should be able to create user`() {
         fixture
-            .`when`(CreateUserCommand(userId, username))
-            .expectEvents(UserCreatedEvent(userId, username))
+            .`when`(CreateUserCommand(username, displayName))
+            .expectEvents(UserCreatedEvent(username, displayName))
     }
 
     @Test
     internal fun `should be able to delete user`() {
         fixture
-            .given(UserCreatedEvent(userId, username))
-            .`when`(DeleteUserCommand(userId))
-            .expectEvents(UserDeletedEvent(userId))
+            .given(UserCreatedEvent(username, displayName))
+            .`when`(DeleteUserCommand(username))
+            .expectEvents(UserDeletedEvent(username))
             .expectMarkedDeleted()
     }
 }

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 internal class BankProjectionEventHandlerTest {
 
     private val accountId = uuid()
-    private val userId = uuid()
+    private val username = "mock-user"
 
     @MockK
     private lateinit var bankProjectionRepository: BankProjectionRepository
@@ -34,10 +34,10 @@ internal class BankProjectionEventHandlerTest {
     internal fun `should persist new bank account`() {
         every { bankProjectionRepository.save(any()) }.returnsEmptyMono()
 
-        bankProjectionEventHandler.on(BankAccountCreatedEvent(accountId, userId))
+        bankProjectionEventHandler.on(BankAccountCreatedEvent(accountId, username))
 
         verify {
-            bankProjectionRepository.save(BankProjection(accountId, userId))
+            bankProjectionRepository.save(BankProjection(accountId, username))
         }
     }
 
@@ -49,8 +49,8 @@ internal class BankProjectionEventHandlerTest {
         bankProjectionEventHandler.on(BankAccountBalanceUpdatedEvent(accountId, 0, 10))
 
         assertEquals(
-            BankProjection(accountId = accountId, userId = userId, balance = 10),
-            mapperSlot.captured.invoke(BankProjection(accountId, userId))
+            BankProjection(accountId = accountId, username = username, balance = 10),
+            mapperSlot.captured.invoke(BankProjection(accountId, username))
         )
     }
 

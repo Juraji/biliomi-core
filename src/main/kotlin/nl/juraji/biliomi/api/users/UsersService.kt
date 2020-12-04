@@ -5,10 +5,8 @@ import nl.juraji.biliomi.domain.user.commands.*
 import nl.juraji.biliomi.projections.UserProjection
 import nl.juraji.biliomi.projections.repositories.AuthorityGroupProjectionRepository
 import nl.juraji.biliomi.projections.repositories.UserProjectionRepository
-import nl.juraji.biliomi.utils.extensions.uuid
 import nl.juraji.reactor.validations.ValidationException
 import nl.juraji.reactor.validations.validate
-import nl.juraji.reactor.validations.validateAsync
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -25,37 +23,38 @@ class UsersService(
 
     fun findUsers(): Flux<UserProjection> = userRepository.findAll()
 
-    fun findUser(userId: String): Mono<UserProjection> = userRepository.findById(userId)
+    fun findUser(username: String): Mono<UserProjection> = userRepository.findById(username)
 
-    fun createUser(userId: String?, username: String, password: String?): Mono<String> =
-        validateAsync { isFalse(userRepository.existsByUsername(username)) { "A user with name $username already exists" } }
-            .flatMap {
-                commandGateway.send(CreateUserCommand(
-                    userId = userId ?: uuid(),
-                    username,
-                    passwordHash = password?.let { passwordEncoder.encode(it) }
-                ))
-            }
+    fun createUser(username: String, displayName: String?, password: String?): Mono<String> =
+        commandGateway.send(CreateUserCommand(
+            username = username,
+            displayName = displayName ?: username,
+            passwordHash = password?.let { passwordEncoder.encode(it) }
+        ))
 
-    fun deleteUser(userId: String): Mono<Unit> = commandGateway.send(DeleteUserCommand(userId))
+    fun deleteUser(username: String): Mono<Unit> = commandGateway.send(DeleteUserCommand(username))
 
-    fun addGroupToUser(userId: String, groupId: String): Mono<Unit> = authorityGroupRepository
+    fun addGroupToUser(username: String, groupId: String): Mono<Unit> = authorityGroupRepository
         .findById(groupId)
         .onErrorMap { ValidationException("Authority group with id $groupId does not exist") }
-        .flatMap { commandGateway.send(AddUserToAuthorityGroupCommand(userId, groupId)) }
+        .flatMap { commandGateway.send(AddUserToAuthorityGroupCommand(username, groupId)) }
 
-    fun removeGroupFromUser(userId: String, groupId: String): Mono<Unit> =
-        commandGateway.send(RemoveUserFromAuthorityGroupCommand(userId, groupId))
+    fun removeGroupFromUser(username: String, groupId: String): Mono<Unit> =
+        commandGateway.send(RemoveUserFromAuthorityGroupCommand(username, groupId))
 
-    fun updateUsername(userId: String, newUsername: String): Mono<Unit> =
-        validateAsync { isFalse(userRepository.existsByUsername(newUsername)) { "A user with name $newUsername already exists" } }
-            .flatMap { commandGateway.send(SetUserUsernameCommand(userId, newUsername)) }
+    fun updateDisplayName(username: String, newDisplayName: String): Mono<Unit> =
+        commandGateway.send(SetUserDisplayNameCommand(username, newDisplayName))
 
-    fun updatePassword(userId: String, currentPassword: String, newPassword: String): Mono<Unit> =
+    fun updatePassword(username: String, currentPassword: String, newPassword: String): Mono<Unit> =
         ReactiveWebContext.getCurrentUser()
             .validate {
                 isTrue(passwordEncoder.matches(currentPassword, it.password)) { "Current password is incorrect" }
-                isFalse(passwordEncoder.matches(newPassword, it.password)) { "Current password is the same as the previous password" }
+                isFalse(
+                    passwordEncoder.matches(
+                        newPassword,
+                        it.password
+                    )
+                ) { "Current password is the same as the previous password" }
             }
-            .flatMap { commandGateway.send(SetUserPasswordCommand(userId, passwordEncoder.encode(newPassword))) }
+            .flatMap { commandGateway.send(SetUserPasswordCommand(username, passwordEncoder.encode(newPassword))) }
 }

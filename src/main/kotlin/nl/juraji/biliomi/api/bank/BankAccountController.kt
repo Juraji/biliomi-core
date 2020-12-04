@@ -2,9 +2,9 @@ package nl.juraji.biliomi.api.bank
 
 import nl.juraji.biliomi.configuration.security.Authorities
 import nl.juraji.biliomi.projections.BankProjection
-import nl.juraji.biliomi.projections.UserPrincipal
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -18,14 +18,14 @@ class BankAccountController(
     @GetMapping("/me")
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ME}')")
     fun getMyAccount(
-        @AuthenticationPrincipal principal: UserPrincipal
-    ): Mono<BankProjection> = bankAccountService.getAccountByUserId(principal.userId)
+        @AuthenticationPrincipal principal: UserDetails
+    ): Mono<BankProjection> = bankAccountService.getAccountByUsername(principal.username)
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{username}")
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ALL}')")
     fun getAccount(
-        @PathVariable("userId") userId: String
-    ): Mono<BankProjection> = bankAccountService.getAccountByUserId(userId)
+        @PathVariable("username") username: String
+    ): Mono<BankProjection> = bankAccountService.getAccountByUsername(username)
 
     @GetMapping
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ALL}')")

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 internal class BankAccountAggregateTest {
     private lateinit var fixture: AggregateTestFixture<BankAccountAggregate>
     private val accountId = uuid()
-    private val userId = uuid()
+    private val username = uuid()
 
     @BeforeEach
     fun setUp() {
@@ -26,15 +26,15 @@ internal class BankAccountAggregateTest {
     @Test
     internal fun `should be able to create account`() {
         fixture
-            .`when`(CreateBankAccountCommand(accountId, userId))
-            .expectEvents(BankAccountCreatedEvent(accountId, userId))
+            .`when`(CreateBankAccountCommand(accountId, username))
+            .expectEvents(BankAccountCreatedEvent(accountId, username))
     }
 
     @Test
     internal fun `should be able to add points`() {
         fixture
             .given(
-                BankAccountCreatedEvent(accountId, userId),
+                BankAccountCreatedEvent(accountId, username),
                 BankAccountBalanceUpdatedEvent(accountId, 0, 25)
             )
             .`when`(AddBankAccountBalanceCommand(accountId, 10, "A Message"))
@@ -44,7 +44,7 @@ internal class BankAccountAggregateTest {
     @Test
     internal fun `should fail to add negative points`() {
         fixture
-            .given(BankAccountCreatedEvent(accountId, userId))
+            .given(BankAccountCreatedEvent(accountId, username))
             .`when`(AddBankAccountBalanceCommand(accountId, -10))
             .expectException(ValidationException::class.java)
     }
@@ -53,7 +53,7 @@ internal class BankAccountAggregateTest {
     internal fun `should be able to take points`() {
         fixture
             .given(
-                BankAccountCreatedEvent(accountId, userId),
+                BankAccountCreatedEvent(accountId, username),
                 BankAccountBalanceUpdatedEvent(accountId, 0, 25)
             )
             .`when`(TakeBankAccountBalanceCommand(accountId, 10, "A message"))
@@ -63,7 +63,7 @@ internal class BankAccountAggregateTest {
     @Test
     internal fun `should fail to take negative points`() {
         fixture
-            .given(BankAccountCreatedEvent(accountId, userId))
+            .given(BankAccountCreatedEvent(accountId, username))
             .`when`(TakeBankAccountBalanceCommand(accountId, -10))
             .expectException(ValidationException::class.java)
     }
@@ -72,7 +72,7 @@ internal class BankAccountAggregateTest {
     internal fun `should fail to take points when balance too low`() {
         fixture
             .given(
-                BankAccountCreatedEvent(accountId, userId),
+                BankAccountCreatedEvent(accountId, username),
                 BankAccountBalanceUpdatedEvent(accountId, 0, 5)
             )
             .`when`(TakeBankAccountBalanceCommand(accountId, 10))
@@ -83,7 +83,7 @@ internal class BankAccountAggregateTest {
     internal fun `should be able to delete bank`() {
         fixture
             .given(
-                BankAccountCreatedEvent(accountId, userId),
+                BankAccountCreatedEvent(accountId, username),
                 BankAccountBalanceUpdatedEvent(accountId, 0, 5)
             )
             .`when`(DeleteBankAccountCommand(accountId))
