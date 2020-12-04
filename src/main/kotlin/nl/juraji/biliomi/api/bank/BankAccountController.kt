@@ -2,7 +2,7 @@ package nl.juraji.biliomi.api.bank
 
 import nl.juraji.biliomi.configuration.security.Authorities
 import nl.juraji.biliomi.projections.BankProjection
-import nl.juraji.biliomi.security.UserPrincipal
+import nl.juraji.biliomi.projections.UserPrincipal
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -31,29 +31,31 @@ class BankAccountController(
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ALL}')")
     fun getAllAccounts(): Flux<BankProjection> = bankAccountService.getAllAccounts()
 
-    @PostMapping("/{userId}/points/add")
+    @PostMapping("/{accountId}/points/add")
     @PreAuthorize("hasRole('${Authorities.BANK_ADD_POINTS}')")
     fun addPoints(
-        @PathVariable("userId") userId: String,
-        @RequestParam("amount") amount: Long
-    ): Mono<Unit> = bankAccountService.addPoints(userId, amount)
+        @PathVariable("accountId") accountId: String,
+        @RequestParam("amount") amount: Long,
+        @RequestParam("message", required = false) message: String?,
+    ): Mono<Unit> = bankAccountService.addPoints(accountId, amount, message)
 
-    @PostMapping("/{userId}/points/take")
+    @PostMapping("/{accountId}/points/take")
     @PreAuthorize("hasRole('${Authorities.BANK_TAKE_POINTS}')")
     fun takePoints(
-        @PathVariable("userId") userId: String,
-        @RequestParam("amount") amount: Long
-    ): Mono<Unit> = bankAccountService.takePoints(userId, amount)
+        @PathVariable("accountId") accountId: String,
+        @RequestParam("amount") amount: Long,
+        @RequestParam("message", required = false) message: String?,
+    ): Mono<Unit> = bankAccountService.takePoints(accountId, amount, message)
 
-    @PostMapping("/{userId}/interest/start")
+    @PostMapping("/{accountId}/interest/start")
     @PreAuthorize("hasRole('${Authorities.BANK_START_STOP_INTEREST}')")
     fun startInterest(
-        @PathVariable("userId") userId: String,
-    ): Mono<Unit> = bankAccountService.startInterest(userId)
+        @PathVariable("accountId") accountId: String,
+    ): Mono<Unit> = bankAccountService.startInterest(accountId)
 
-    @PostMapping("/{userId}/interest/end")
+    @PostMapping("/{accountId}/interest/end")
     @PreAuthorize("hasRole('${Authorities.BANK_START_STOP_INTEREST}')")
     fun endInterest(
-        @PathVariable("userId") userId: String,
-    ): Mono<Unit> = bankAccountService.endInterest(userId)
+        @PathVariable("accountId") accountId: String,
+    ): Mono<Unit> = bankAccountService.endInterest(accountId)
 }

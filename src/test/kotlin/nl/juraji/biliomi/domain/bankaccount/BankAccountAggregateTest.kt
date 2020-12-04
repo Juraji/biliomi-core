@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 
 internal class BankAccountAggregateTest {
     private lateinit var fixture: AggregateTestFixture<BankAccountAggregate>
+    private val accountId = uuid()
     private val userId = uuid()
 
     @BeforeEach
@@ -25,26 +26,26 @@ internal class BankAccountAggregateTest {
     @Test
     internal fun `should be able to create account`() {
         fixture
-            .`when`(CreateBankAccountCommand(userId))
-            .expectEvents(BankAccountCreatedEvent(userId))
+            .`when`(CreateBankAccountCommand(accountId, userId))
+            .expectEvents(BankAccountCreatedEvent(accountId, userId))
     }
 
     @Test
     internal fun `should be able to add points`() {
         fixture
             .given(
-                BankAccountCreatedEvent(userId),
-                BankAccountBalanceUpdatedEvent(userId, 0, 25)
+                BankAccountCreatedEvent(accountId, userId),
+                BankAccountBalanceUpdatedEvent(accountId, 0, 25)
             )
-            .`when`(AddBankAccountBalanceCommand(userId, 10, "A Message"))
-            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 35, "A Message"))
+            .`when`(AddBankAccountBalanceCommand(accountId, 10, "A Message"))
+            .expectEvents(BankAccountBalanceUpdatedEvent(accountId, 25, 35, "A Message"))
     }
 
     @Test
     internal fun `should fail to add negative points`() {
         fixture
-            .given(BankAccountCreatedEvent(userId))
-            .`when`(AddBankAccountBalanceCommand(userId, -10))
+            .given(BankAccountCreatedEvent(accountId, userId))
+            .`when`(AddBankAccountBalanceCommand(accountId, -10))
             .expectException(ValidationException::class.java)
     }
 
@@ -52,18 +53,18 @@ internal class BankAccountAggregateTest {
     internal fun `should be able to take points`() {
         fixture
             .given(
-                BankAccountCreatedEvent(userId),
-                BankAccountBalanceUpdatedEvent(userId, 0, 25)
+                BankAccountCreatedEvent(accountId, userId),
+                BankAccountBalanceUpdatedEvent(accountId, 0, 25)
             )
-            .`when`(TakeBankAccountBalanceCommand(userId, 10, "A message"))
-            .expectEvents(BankAccountBalanceUpdatedEvent(userId, 25, 15, "A message"))
+            .`when`(TakeBankAccountBalanceCommand(accountId, 10, "A message"))
+            .expectEvents(BankAccountBalanceUpdatedEvent(accountId, 25, 15, "A message"))
     }
 
     @Test
     internal fun `should fail to take negative points`() {
         fixture
-            .given(BankAccountCreatedEvent(userId))
-            .`when`(TakeBankAccountBalanceCommand(userId, -10))
+            .given(BankAccountCreatedEvent(accountId, userId))
+            .`when`(TakeBankAccountBalanceCommand(accountId, -10))
             .expectException(ValidationException::class.java)
     }
 
@@ -71,10 +72,10 @@ internal class BankAccountAggregateTest {
     internal fun `should fail to take points when balance too low`() {
         fixture
             .given(
-                BankAccountCreatedEvent(userId),
-                BankAccountBalanceUpdatedEvent(userId, 0, 5)
+                BankAccountCreatedEvent(accountId, userId),
+                BankAccountBalanceUpdatedEvent(accountId, 0, 5)
             )
-            .`when`(TakeBankAccountBalanceCommand(userId, 10))
+            .`when`(TakeBankAccountBalanceCommand(accountId, 10))
             .expectException(ValidationException::class.java)
     }
 
@@ -82,11 +83,11 @@ internal class BankAccountAggregateTest {
     internal fun `should be able to delete bank`() {
         fixture
             .given(
-                BankAccountCreatedEvent(userId),
-                BankAccountBalanceUpdatedEvent(userId, 0, 5)
+                BankAccountCreatedEvent(accountId, userId),
+                BankAccountBalanceUpdatedEvent(accountId, 0, 5)
             )
-            .`when`(DeleteBankAccountCommand(userId))
-            .expectEvents(BankAccountDeletedEvent(userId))
+            .`when`(DeleteBankAccountCommand(accountId))
+            .expectEvents(BankAccountDeletedEvent(accountId))
             .expectMarkedDeleted()
     }
 }

@@ -19,21 +19,21 @@ class BankProjectionEventHandler(
     @EventHandler
     fun on(e: BankAccountCreatedEvent) {
         bankProjectionRepository
-            .save(BankProjection(userId = e.userId))
+            .save(BankProjection(accountId = e.accountId, userId = e.userId))
             .block()
     }
 
     @EventHandler
     fun on(e: BankAccountBalanceUpdatedEvent) {
         bankProjectionRepository
-            .update(e.userId) { copy(balance = e.newBalance) }
+            .update(e.accountId) { copy(balance = e.newBalance) }
             .block()
     }
 
     @EventHandler
     fun on(e: BankAccountDeletedEvent) {
         bankProjectionRepository
-            .deleteById(e.userId)
+            .deleteById(e.accountId)
             .block()
     }
 }

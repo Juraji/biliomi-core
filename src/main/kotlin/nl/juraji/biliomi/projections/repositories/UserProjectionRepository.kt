@@ -1,6 +1,6 @@
-package nl.juraji.biliomi.security.repositories
+package nl.juraji.biliomi.projections.repositories
 
-import nl.juraji.biliomi.security.UserPrincipal
+import nl.juraji.biliomi.projections.UserProjection
 import nl.juraji.biliomi.utils.ReactiveRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.jpa.repository.JpaRepository
@@ -12,21 +12,22 @@ import reactor.core.scheduler.Scheduler
 import java.util.*
 
 @Repository
-interface SyncUserPrincipalRepository : JpaRepository<UserPrincipal, String> {
-    fun findByUsername(username: String): Optional<UserPrincipal>
+interface SyncUserProjectionRepository : JpaRepository<UserProjection, String> {
     fun existsByUsername(username: String): Boolean
+    fun findByUsername(username: String): Optional<UserProjection>
 }
 
 @Service
-class UserPrincipalRepository(
-    syncUserPrincipalRepository: SyncUserPrincipalRepository,
+class UserProjectionRepository(
+    repository: SyncUserProjectionRepository,
     transactionTemplate: TransactionTemplate,
-    @Qualifier("securityScheduler") scheduler: Scheduler,
-) : ReactiveRepository<SyncUserPrincipalRepository, UserPrincipal, String>(
-    syncUserPrincipalRepository,
+    @Qualifier("projectionsScheduler") scheduler: Scheduler
+) : ReactiveRepository<SyncUserProjectionRepository, UserProjection, String>(
+    repository,
     scheduler,
     transactionTemplate
 ) {
-    fun findByUsername(username: String): Mono<UserPrincipal> = fromOptional { findByUsername(username) }
     fun existsByUsername(username: String): Mono<Boolean> = from { existsByUsername(username) }
+
+    fun findByUsername(username: String): Mono<UserProjection> = fromOptional { findByUsername(username) }
 }

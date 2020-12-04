@@ -1,9 +1,11 @@
 package nl.juraji.biliomi.api
 
-import nl.juraji.biliomi.security.UserPrincipal
+import nl.juraji.biliomi.projections.UserPrincipal
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 object ReactiveWebContext {
 
@@ -19,5 +21,14 @@ object ReactiveWebContext {
 
     fun getCurrentUser(): Mono<UserPrincipal> = getSecurityContext()
         .map { it.authentication.principal as UserPrincipal }
+        .switchIfEmpty {
+            UserPrincipal(
+                userId = "SYSTEM",
+                authorities = emptyList(),
+                username = "System",
+                password = "",
+                enabled = true,
+            ).toMono()
+        }
 
 }

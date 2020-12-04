@@ -13,13 +13,19 @@ import org.axonframework.spring.stereotype.Aggregate
 class BankAccountAggregate() {
 
     @AggregateIdentifier
+    private lateinit var accountId: String
     private lateinit var userId: String
     private var balance: Long = 0
     private var interestStarted: Boolean = false
 
     @CommandHandler
     constructor(cmd: CreateBankAccountCommand) : this() {
-        AggregateLifecycle.apply(BankAccountCreatedEvent(userId = cmd.userId))
+        AggregateLifecycle.apply(
+            BankAccountCreatedEvent(
+                accountId = cmd.accountId,
+                userId = cmd.userId
+            )
+        )
     }
 
     @CommandHandler
@@ -30,7 +36,7 @@ class BankAccountAggregate() {
 
         AggregateLifecycle.apply(
             BankAccountBalanceUpdatedEvent(
-                userId = userId,
+                accountId = accountId,
                 previousBalance = balance,
                 newBalance = balance + cmd.amount,
                 message = cmd.message
@@ -47,7 +53,7 @@ class BankAccountAggregate() {
 
         AggregateLifecycle.apply(
             BankAccountBalanceUpdatedEvent(
-                userId = userId,
+                accountId = accountId,
                 previousBalance = balance,
                 newBalance = balance - cmd.amount,
                 message = cmd.message
@@ -61,7 +67,7 @@ class BankAccountAggregate() {
             isFalse(interestStarted) { "Interest has already been started for $userId" }
         }
 
-        AggregateLifecycle.apply(InterestStartedEvent(userId))
+        AggregateLifecycle.apply(InterestStartedEvent(accountId))
     }
 
     @CommandHandler
@@ -70,18 +76,19 @@ class BankAccountAggregate() {
             isTrue(interestStarted) { "Interest has not yey been started for $userId" }
         }
 
-        AggregateLifecycle.apply(InterestEndedEvent(userId))
+        AggregateLifecycle.apply(InterestEndedEvent(accountId))
     }
 
     @CommandHandler
     fun handle(cmd: DeleteBankAccountCommand) {
         AggregateLifecycle.apply(
-            BankAccountDeletedEvent(userId = userId)
+            BankAccountDeletedEvent(accountId = accountId)
         )
     }
 
     @EventSourcingHandler
     fun on(e: BankAccountCreatedEvent) {
+        accountId = e.accountId
         userId = e.userId
     }
 

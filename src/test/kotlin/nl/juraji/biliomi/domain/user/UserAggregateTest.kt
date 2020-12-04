@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 internal class UserAggregateTest {
     private lateinit var fixture: AggregateTestFixture<UserAggregate>
     private val userId = uuid()
+    private val username = "Mock user"
 
     @BeforeEach
     fun setUp() {
@@ -21,14 +22,14 @@ internal class UserAggregateTest {
     @Test
     internal fun `should be able to create user`() {
         fixture
-            .`when`(CreateUserCommand(userId))
-            .expectEvents(UserCreatedEvent(userId))
+            .`when`(CreateUserCommand(userId, username))
+            .expectEvents(UserCreatedEvent(userId, username))
     }
 
     @Test
     internal fun `should be able to delete user`() {
         fixture
-            .given(UserCreatedEvent(userId))
+            .given(UserCreatedEvent(userId, username))
             .`when`(DeleteUserCommand(userId))
             .expectEvents(UserDeletedEvent(userId))
             .expectMarkedDeleted()

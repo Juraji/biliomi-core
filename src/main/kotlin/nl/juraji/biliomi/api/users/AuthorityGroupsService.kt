@@ -1,11 +1,15 @@
 package nl.juraji.biliomi.api.users
 
 import nl.juraji.biliomi.configuration.security.Authorities
-import nl.juraji.biliomi.security.AuthorityGroup
-import nl.juraji.biliomi.security.repositories.AuthorityGroupRepository
+import nl.juraji.biliomi.domain.user.commands.CreateAuthorityGroupCommand
+import nl.juraji.biliomi.domain.user.commands.DeleteAuthorityGroupCommand
+import nl.juraji.biliomi.domain.user.commands.SetAuthorityGroupAuthoritiesCommand
+import nl.juraji.biliomi.domain.user.commands.SetAuthorityGroupNameCommand
+import nl.juraji.biliomi.projections.AuthorityGroupProjection
+import nl.juraji.biliomi.projections.repositories.AuthorityGroupProjectionRepository
 import nl.juraji.biliomi.utils.extensions.uuid
-import nl.juraji.reactor.validations.validate
 import nl.juraji.reactor.validations.validateAsync
+import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -13,73 +17,64 @@ import reactor.core.publisher.Mono
 
 @Service
 class AuthorityGroupsService(
-    private val authorityGroupRepository: AuthorityGroupRepository,
+    private val authorityGroupRepository: AuthorityGroupProjectionRepository,
+    private val commandGateway: ReactorCommandGateway
 ) {
 
-    fun getAuthorityGroups(): Flux<AuthorityGroup> = authorityGroupRepository.findAll()
+    fun getAuthorityGroups(): Flux<AuthorityGroupProjection> = authorityGroupRepository.findAll()
 
-    fun createAuthorityGroup(groupName: String, authorities: Set<String>): Mono<AuthorityGroup> =
-        validateAsync {
-            isFalse(authorityGroupRepository.existsByName(groupName)) { "A group with name $groupName already exists" }
-
-            synchronous {
-                isNotBlank(groupName) { "Group name should not be blank" }
-                isNotEmpty(authorities) { "Group authorities may be empty" }
-                isTrue(authorities.all(String::isNotBlank)) { "Group authorities may not contain empty values" }
-                isTrue(authorities.all(Authorities.all::contains)) { "Unknown entry found in authorities" }
-            }
-        }
-            .map {
-                AuthorityGroup(
-                    groupId = uuid(),
-                    name = groupName,
-                    authorities = authorities
+    fun createAuthorityGroup(groupName: String, authorities: Set<String>): Mono<String> =
+        validateAsync { isFalse(authorityGroupRepository.existsByName(groupName)) { "A group with name $groupName already exists" } }
+            .flatMap {
+                commandGateway.send(
+                    CreateAuthorityGroupCommand(
+                        groupId = uuid(),
+                        groupName = groupName,
+                        authorities = authorities
+                    )
                 )
             }
-            .flatMap(authorityGroupRepository::save)
 
-    fun copyAuthorityGroup(sourceGroupId: String, newGroupName: String): Mono<AuthorityGroup> = authorityGroupRepository
-        .findById(sourceGroupId)
-        .validateAsync {
-            isFalse(authorityGroupRepository.existsByName(newGroupName)) { "A group with name $newGroupName already exists" }
-            synchronous {
-                isNotBlank(newGroupName) { "Group name should not be blank" }
+    fun copyAuthorityGroup(sourceGroupId: String, newGroupName: String): Mono<String> =
+        authorityGroupRepository
+            .findById(sourceGroupId)
+            .validateAsync { isFalse(authorityGroupRepository.existsByName(newGroupName)) { "A group with name $newGroupName already exists" } }
+            .flatMap {
+                commandGateway.send(
+                    CreateAuthorityGroupCommand(
+                        groupId = uuid(),
+                        groupName = newGroupName,
+                        authorities = it.authorities
+                    )
+                )
             }
-        }
-        .map {
-            it.copy(
-                groupId = uuid(),
-                name = newGroupName
-            )
-        }
-        .flatMap(authorityGroupRepository::save)
 
-    fun updateAuthorityGroup(update: AuthorityGroup): Mono<AuthorityGroup> = authorityGroupRepository
+    // TODO: Split up since commands may only be sent on actual changes (validation)
+    fun updateAuthorityGroup(update: AuthorityGroupProjection): Mono<Unit> = authorityGroupRepository
         .findById(update.groupId)
         .validateAsync {
-            unless(it.name == update.name) {
-                isFalse(authorityGroupRepository.existsByName(update.name)) { "A group with name ${update.name} already exists" }
-            }
-
-            synchronous {
-                isNotBlank(update.name) { "Group name should not be blank" }
-                isNotEmpty(update.authorities) { "Group authorities may be empty" }
-                isTrue(update.authorities.all(String::isNotBlank)) { "Group authorities may not contain empty values" }
-                isTrue(update.authorities.all(Authorities.all::contains)) { "Unknown entry found in authorities" }
+            unless(it.groupName == update.groupName) {
+                isFalse(authorityGroupRepository.existsByName(update.groupName)) { "A group with name ${update.groupName} already exists" }
             }
         }
-        .map {
-            it.copy(
-                name = update.name,
-                authorities = update.authorities
+        .flatMap {
+            commandGateway.send<Unit>(
+                SetAuthorityGroupNameCommand(
+                    groupId = it.groupId,
+                    groupName = update.groupName
+                )
             )
+                .then(
+                    commandGateway.send(
+                        SetAuthorityGroupAuthoritiesCommand(
+                            groupId = it.groupId,
+                            authorities = update.authorities
+                        )
+                    )
+                )
         }
-        .flatMap(authorityGroupRepository::save)
 
-    fun deleteAuthorityGroup(authorityGroupId: String): Mono<AuthorityGroup> = authorityGroupRepository
-        .findById(authorityGroupId)
-        .validate { isFalse(it.protected) { "Authority group ${it.name} is protected and can not be deleted" } }
-        .flatMap { authorityGroupRepository.deleteById(authorityGroupId) }
+    fun deleteAuthorityGroup(groupId: String): Mono<Unit> = commandGateway.send(DeleteAuthorityGroupCommand(groupId))
 
     fun getPermissionList(): Flux<GrantedAuthority> = Flux
         .fromIterable(Authorities.all)

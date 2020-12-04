@@ -9,3 +9,12 @@ logging:
     nl.juraji: debug
     org.springframework.web: info
     org.springframework.security: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - mappings

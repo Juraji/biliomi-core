@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MockKExtension::class)
 internal class BankProjectionEventHandlerTest {
 
+    private val accountId = uuid()
     private val userId = uuid()
 
     @MockK
@@ -33,10 +34,10 @@ internal class BankProjectionEventHandlerTest {
     internal fun `should persist new bank account`() {
         every { bankProjectionRepository.save(any()) }.returnsEmptyMono()
 
-        bankProjectionEventHandler.on(BankAccountCreatedEvent(userId))
+        bankProjectionEventHandler.on(BankAccountCreatedEvent(accountId, userId))
 
         verify {
-            bankProjectionRepository.save(BankProjection(userId))
+            bankProjectionRepository.save(BankProjection(accountId, userId))
         }
     }
 
@@ -45,19 +46,22 @@ internal class BankProjectionEventHandlerTest {
         val mapperSlot: CapturingSlot<BankProjection.() -> BankProjection> = slot()
         every { bankProjectionRepository.update(any(), capture(mapperSlot)) }.returnsEmptyMono()
 
-        bankProjectionEventHandler.on(BankAccountBalanceUpdatedEvent(userId, 0, 10))
+        bankProjectionEventHandler.on(BankAccountBalanceUpdatedEvent(accountId, 0, 10))
 
-        assertEquals(BankProjection(userId = userId, balance = 10), mapperSlot.captured.invoke(BankProjection(userId)))
+        assertEquals(
+            BankProjection(accountId = accountId, userId = userId, balance = 10),
+            mapperSlot.captured.invoke(BankProjection(accountId, userId))
+        )
     }
 
     @Test
     internal fun `should delete bank accounts`() {
         every { bankProjectionRepository.deleteById(any()) }.returnsEmptyMono()
 
-        bankProjectionEventHandler.on(BankAccountDeletedEvent(userId))
+        bankProjectionEventHandler.on(BankAccountDeletedEvent(accountId))
 
         verify {
-            bankProjectionRepository.deleteById(userId)
+            bankProjectionRepository.deleteById(accountId)
         }
     }
 }

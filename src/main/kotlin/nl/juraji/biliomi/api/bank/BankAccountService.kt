@@ -16,18 +16,18 @@ class BankAccountService(
     private val bankProjectionRepository: BankProjectionRepository,
     private val reactorCommandGateway: ReactorCommandGateway
 ) {
-    fun getAccountByUserId(userId: String): Mono<BankProjection> = bankProjectionRepository.findById(userId)
+    fun getAccountByUserId(userId: String): Mono<BankProjection> = bankProjectionRepository.findByUserId(userId)
     fun getAllAccounts(): Flux<BankProjection> = bankProjectionRepository.findAll()
-    fun addPoints(userId: String, amount: Long): Mono<Unit> =
-        reactorCommandGateway.send(AddBankAccountBalanceCommand(userId, amount))
+    fun addPoints(accountId: String, amount: Long, message: String?): Mono<Unit> =
+        reactorCommandGateway.send(AddBankAccountBalanceCommand(accountId, amount, message))
 
-    fun takePoints(userId: String, amount: Long): Mono<Unit> =
-        reactorCommandGateway.send(TakeBankAccountBalanceCommand(userId, amount))
+    fun takePoints(accountId: String, amount: Long, message: String?): Mono<Unit> =
+        reactorCommandGateway.send(TakeBankAccountBalanceCommand(accountId, amount, message))
 
-    fun startInterest(userId: String): Mono<Unit> =
-        reactorCommandGateway.send(StartInterestCommand(userId = userId))
+    fun startInterest(accountId: String): Mono<Unit> =
+        reactorCommandGateway.send(StartInterestCommand(accountId))
 
-    fun endInterest(userId: String): Mono<Unit> =
-        reactorCommandGateway.send(EndInterestCommand(userId = userId))
+    fun endInterest(accountId: String): Mono<Unit> =
+        reactorCommandGateway.send(EndInterestCommand(accountId))
 
 }

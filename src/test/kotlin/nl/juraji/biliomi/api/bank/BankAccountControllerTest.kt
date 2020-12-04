@@ -8,6 +8,7 @@ import nl.juraji.biliomi.configuration.ApiTestConfiguration
 import nl.juraji.biliomi.configuration.WithMockPrincipal
 import nl.juraji.biliomi.configuration.security.Authorities
 import nl.juraji.biliomi.projections.BankProjection
+import nl.juraji.biliomi.utils.extensions.uuid
 import nl.juraji.biliomi.utils.returnsMonoOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -44,7 +45,7 @@ internal class BankAccountControllerTest {
     @WithMockPrincipal(roles = [Authorities.BANK_READ_ME])
     internal fun `should be able to get own bank account`() {
         val userId = ReactiveWebContext.getCurrentUser().map { it.userId }.block()!!
-        val expected = BankProjection(userId, 150)
+        val expected = BankProjection(uuid(), userId, 150)
 
         every { bankAccountService.getAccountByUserId(userId) } returnsMonoOf expected
 

@@ -7,18 +7,24 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import reactor.core.publisher.Mono
 import reactor.core.scheduler.Scheduler
+import java.util.*
 
 @Repository
-interface SyncBankProjectionRepository : JpaRepository<BankProjection, String>
+interface SyncBankProjectionRepository : JpaRepository<BankProjection, String> {
+    fun findByUserId(userId: String): Optional<BankProjection>
+}
 
 @Service
 class BankProjectionRepository(
-    syncBankProjectionRepository: SyncBankProjectionRepository,
+    repository: SyncBankProjectionRepository,
     transactionTemplate: TransactionTemplate,
     @Qualifier("projectionsScheduler") scheduler: Scheduler
 ) : ReactiveRepository<SyncBankProjectionRepository, BankProjection, String>(
-    syncBankProjectionRepository,
+    repository,
     scheduler,
     transactionTemplate
-)
+) {
+    fun findByUserId(userId: String): Mono<BankProjection> = fromOptional { findByUserId(userId) }
+}

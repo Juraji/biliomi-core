@@ -4,5 +4,6 @@ import org.axonframework.serialization.Revision
 
 @Revision("1.0")
 data class BankAccountCreatedEvent(
-    override val userId: String,
+    override val accountId: String,
+    val userId: String
 ) : BankAccountEvent

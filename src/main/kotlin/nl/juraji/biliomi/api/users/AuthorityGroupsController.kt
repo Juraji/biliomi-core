@@ -1,7 +1,7 @@
 package nl.juraji.biliomi.api.users
 
 import nl.juraji.biliomi.configuration.security.Authorities
-import nl.juraji.biliomi.security.AuthorityGroup
+import nl.juraji.biliomi.projections.AuthorityGroupProjection
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.web.bind.annotation.*
@@ -16,35 +16,39 @@ class AuthorityGroupsController(
 
     @GetMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_READ_ALL}')")
-    fun getAuthorityGroups(): Flux<AuthorityGroup> = authorityGroupsService.getAuthorityGroups()
+    fun getAuthorityGroups(): Flux<AuthorityGroupProjection> = authorityGroupsService.getAuthorityGroups()
 
     @PostMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
     fun createAuthorityGroup(
         @RequestBody createAuthorityGroupDto: CreateAuthorityGroupDto,
-    ): Mono<AuthorityGroup> = authorityGroupsService.createAuthorityGroup(
-        groupName = createAuthorityGroupDto.groupName,
-        authorities = createAuthorityGroupDto.authorities,
-    )
+    ): Mono<AuthorityGroupCreatedDTO> = authorityGroupsService
+        .createAuthorityGroup(
+            groupName = createAuthorityGroupDto.groupName,
+            authorities = createAuthorityGroupDto.authorities,
+        )
+        .map { AuthorityGroupCreatedDTO(it) }
 
     @PostMapping("/copy")
     @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
     fun copyAuthorityGroup(
         @RequestParam("sourceGroupId") sourceGroupId: String,
         @RequestParam("newGroupName") newGroupName: String
-    ): Mono<AuthorityGroup> = authorityGroupsService.copyAuthorityGroup(sourceGroupId, newGroupName)
+    ): Mono<AuthorityGroupCreatedDTO> = authorityGroupsService
+        .copyAuthorityGroup(sourceGroupId, newGroupName)
+        .map { AuthorityGroupCreatedDTO(it) }
 
     @PutMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_UPDATE}')")
     fun updateAuthorityGroup(
-        @RequestBody authorityGroup: AuthorityGroup,
-    ): Mono<AuthorityGroup> = authorityGroupsService.updateAuthorityGroup(authorityGroup)
+        @RequestBody authorityGroup: AuthorityGroupProjection,
+    ): Mono<Unit> = authorityGroupsService.updateAuthorityGroup(authorityGroup)
 
     @PreAuthorize("hasRole('${Authorities.GROUPS_DELETE}')")
     @DeleteMapping("/{authorityGroupId}")
     fun deleteAuthorityGroup(
         @PathVariable("authorityGroupId") authorityGroupId: String
-    ): Mono<AuthorityGroup> = authorityGroupsService.deleteAuthorityGroup(authorityGroupId)
+    ): Mono<Unit> = authorityGroupsService.deleteAuthorityGroup(authorityGroupId)
 
     @GetMapping("/permission-list")
     fun getPermissionList(): Flux<GrantedAuthority> = authorityGroupsService.getPermissionList()

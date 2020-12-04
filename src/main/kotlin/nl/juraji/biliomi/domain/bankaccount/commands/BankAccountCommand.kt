@@ -4,5 +4,5 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier
 
 abstract class BankAccountCommand(
     @TargetAggregateIdentifier
-    open val userId: String
+    open val accountId: String
 )

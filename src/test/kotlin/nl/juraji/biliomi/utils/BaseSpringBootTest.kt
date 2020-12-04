@@ -23,6 +23,7 @@ abstract class BaseSpringBootTest {
             withDatabaseName("axon")
             withUsername(dbUsername)
             withPassword(dbPassword)
+            withReuse(true)
             start()
         }
 
@@ -31,17 +32,9 @@ abstract class BaseSpringBootTest {
             withDatabaseName("projections")
             withUsername(dbUsername)
             withPassword(dbPassword)
+            withReuse(true)
             start()
         }
-
-        @Container
-        private val securityContainer = container {
-            withDatabaseName("security")
-            withUsername(dbUsername)
-            withPassword(dbPassword)
-            start()
-        }
-
 
         private fun container(block: KMySQLContainer.() -> Unit): KMySQLContainer = KMySQLContainer().apply(block)
 
@@ -54,7 +47,6 @@ abstract class BaseSpringBootTest {
 
             registry.add("database-test.axon-jdbc-url") { axonContainer.jdbcUrl }
             registry.add("database-test.projections-jdbc-url") { projectionsContainer.jdbcUrl }
-            registry.add("database-test.security-jdbc-url") { securityContainer.jdbcUrl }
         }
     }
 
