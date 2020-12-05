@@ -13,9 +13,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.ResultSetExtractor
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.security.crypto.password.PasswordEncoder
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.util.function.component1
-import reactor.kotlin.core.util.function.component2
+import reactor.kotlin.core.publisher.toFlux
 
 @Configuration
 class InstallService(
@@ -82,38 +80,42 @@ class InstallService(
         val adminUsernamePassword = "admin"
         val adminDisplayName = "Administrator"
 
-        val administratorGroupId: Mono<String> = commandGateway.send(
-            CreateAuthorityGroupCommand(
-                groupId = uuid(),
-                groupName = adminGroupName,
-                authorities = Authorities.all.toSet(),
-                protected = true
-            )
+        val createAdminGroupCmd = CreateAuthorityGroupCommand(
+            groupId = uuid(),
+            groupName = adminGroupName,
+            authorities = Authorities.all.toSet(),
+            protected = true
         )
 
-        val administratorUsername: Mono<String> = commandGateway.send(
-            CreateUserCommand(
-                username = adminUsernamePassword,
-                displayName = adminDisplayName,
-                passwordHash = passwordEncoder.encode(adminUsernamePassword)
-            )
+        val createAdminUserCmd = CreateUserCommand(
+            username = adminUsernamePassword,
+            displayName = adminDisplayName,
+            passwordHash = passwordEncoder.encode(adminUsernamePassword)
         )
 
-        Mono.zip(administratorUsername, administratorGroupId)
-            .flatMap { (username, groupId) ->
-                commandGateway.send<Unit>(
-                    AddUserToAuthorityGroupCommand(
-                        username = username,
-                        groupId = groupId
-                    )
-                ).then(Mono.just(username to groupId))
-            }
-            .doOnNext { (username, groupId) ->
-                logger.info("Created authority group \"$adminGroupName\" with id $groupId")
-                logger.info("Created user \"$adminUsernamePassword\" with password \"$adminUsernamePassword\" with id" +
-                        " $username and added it to group \"$adminGroupName\"")
-            }
-            .block()
+        val linkAdminGrpCmd = AddUserToAuthorityGroupCommand(
+            username = createAdminUserCmd.username,
+            groupId = createAdminGroupCmd.groupId
+        )
+
+        commandGateway
+            .sendAll(
+                arrayOf(
+                    createAdminGroupCmd,
+                    createAdminUserCmd,
+                    linkAdminGrpCmd
+                ).toFlux()
+            )
+            .blockLast()
+
+        logger.info("Created authority group \"$adminGroupName\"")
+        logger.info("""
+            
+            !!! Important !!!
+            Created administrator user "$adminUsernamePassword" with password "$adminUsernamePassword".
+            Use this account to log on to Biliomi. Also make sure to change the password!
+            
+        """.trimIndent())
     }
 
     companion object : LoggerCompanion(InstallService::class)

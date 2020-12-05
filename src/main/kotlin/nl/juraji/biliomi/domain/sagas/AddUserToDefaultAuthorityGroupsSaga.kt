@@ -42,7 +42,7 @@ class AddUserToDefaultAuthorityGroupsSaga {
             defaultGroups.forEach { SagaAssociations.associateWith(ASSOC_GROUP, it.groupId) }
 
             val linkCmds = defaultGroups.toFlux()
-                .delayElements(Duration.ofSeconds(5))
+                .delayElements(Duration.ofSeconds(1))
                 .map { AddUserToAuthorityGroupCommand(e.username, it.groupId) }
 
             commandGateway.sendAll(linkCmds).blockLast()

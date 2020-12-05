@@ -25,7 +25,6 @@ import org.axonframework.modelling.saga.StartSaga
 import org.axonframework.serialization.Revision
 import org.axonframework.spring.stereotype.Saga
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Duration
 
 
 @Saga
@@ -48,7 +47,7 @@ class UserBankAccountManagementSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = ASSOC_USER)
     fun on(e: UserCreatedEvent) {
-        logger.info("Creating bank for user ${e.username}")
+        logger.info("Bank account for user ${e.username}")
         val accountId = generateAccountId(e.username)
 
         SagaLifecycle.associateWith(ASSOC_ACCOUNT, accountId)
@@ -62,7 +61,7 @@ class UserBankAccountManagementSaga {
 
     @SagaEventHandler(associationProperty = ASSOC_ACCOUNT)
     fun on(e: BankAccountCreatedEvent) {
-        logger.info("Bank created for user ${e.username}")
+        logger.info("Bank account created for user ${e.username}")
     }
 
     @SagaEventHandler(associationProperty = ASSOC_ACCOUNT)
