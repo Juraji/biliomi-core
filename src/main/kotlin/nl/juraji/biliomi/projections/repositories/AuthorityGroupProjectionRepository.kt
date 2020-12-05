@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Scheduler
 
 interface SyncAuthorityProjectionGroupRepository : JpaRepository<AuthorityGroupProjection, String> {
     fun existsByGroupName(groupName: String): Boolean
+    fun findByDefaultIsTrue(): List<AuthorityGroupProjection>
 }
 
 @Service
@@ -24,4 +26,5 @@ class AuthorityGroupProjectionRepository(
     transactionTemplate
 ) {
     fun existsByName(groupName: String): Mono<Boolean> = from { existsByGroupName(groupName) }
+    fun findByDefaultIsTrue(): Flux<AuthorityGroupProjection> = fromIterator { findByDefaultIsTrue() }
 }

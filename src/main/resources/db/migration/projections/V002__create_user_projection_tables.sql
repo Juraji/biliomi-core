@@ -1,7 +1,9 @@
 create table AuthorityGroupProjection
 (
-    groupId   varchar(36) not null,
-    groupName varchar(255),
+    groupId     varchar(36) not null,
+    groupName   varchar(255),
+    isProtected bit         not null,
+    isDefault   bit         not null,
     primary key (groupId)
 ) engine = InnoDB;
 
@@ -13,15 +15,15 @@ create table AuthorityGroupProjection_authorities
 
 create table UserProjection
 (
-    username       varchar(255) not null,
+    username     varchar(255) not null,
     passwordHash varchar(255),
-    displayName     varchar(255),
+    displayName  varchar(255),
     primary key (username)
 ) engine = InnoDB;
 
 create table UserProjection_AuthorityGroupProjection
 (
-    UserProjection_username   varchar(255) not null,
+    UserProjection_username varchar(255) not null,
     authorityGroups_groupId varchar(255) not null,
     primary key (UserProjection_username, authorityGroups_groupId)
 ) engine = InnoDB;

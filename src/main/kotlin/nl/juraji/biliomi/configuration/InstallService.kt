@@ -26,8 +26,8 @@ class InstallService(
 
     @EventListener(ContextRefreshedEvent::class)
     fun init() {
-        runInstallTask("installAdministratorGroupAndUser", this::installAdminGroupAndUser)
         runInstallTask("installUsersGroup", this::installUsersGroup)
+        runInstallTask("installAdministratorGroupAndUser", this::installAdminGroupAndUser)
     }
 
     private fun runInstallTask(taskName: String, taskRunner: () -> Unit) {
@@ -53,6 +53,28 @@ class InstallService(
                     logger.error("Install task failed: $taskName", ex)
                 }
         }
+    }
+
+    private fun installUsersGroup() {
+        val usersGroupName = "Users"
+        val usersGroupAuthorities = setOf(
+            Authorities.USERS_READ_ME,
+            Authorities.USERS_UPDATE_ME_DISPLAY_NAME,
+            Authorities.USERS_UPDATE_ME_PASSWORD,
+            Authorities.BANK_READ_ME,
+        )
+
+        commandGateway
+            .send<String>(
+                CreateAuthorityGroupCommand(
+                    groupId = uuid(),
+                    groupName = usersGroupName,
+                    authorities = usersGroupAuthorities,
+                    default = true
+                )
+            )
+            .doOnNext { logger.info("Created authority group \"$usersGroupName\" with id $it as default group") }
+            .block()
     }
 
     private fun installAdminGroupAndUser() {
@@ -91,27 +113,6 @@ class InstallService(
                 logger.info("Created user \"$adminUsernamePassword\" with password \"$adminUsernamePassword\" with id" +
                         " $username and added it to group \"$adminGroupName\"")
             }
-            .block()
-    }
-
-    private fun installUsersGroup() {
-        val usersGroupName = "Users"
-        val usersGroupAuthorities = setOf(
-            Authorities.USERS_READ_ME,
-            Authorities.USERS_UPDATE_ME_DISPLAY_NAME,
-            Authorities.USERS_UPDATE_ME_PASSWORD,
-            Authorities.BANK_READ_ME,
-        )
-
-        commandGateway
-            .send<String>(
-                CreateAuthorityGroupCommand(
-                    groupId = uuid(),
-                    groupName = usersGroupName,
-                    authorities = usersGroupAuthorities
-                )
-            )
-            .doOnNext { logger.info("Created authority group \"$usersGroupName\" with id $it ") }
             .block()
     }
 

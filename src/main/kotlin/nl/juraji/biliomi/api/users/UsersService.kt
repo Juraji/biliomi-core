@@ -49,12 +49,9 @@ class UsersService(
         ReactiveWebContext.getCurrentUser()
             .validate {
                 isTrue(passwordEncoder.matches(currentPassword, it.password)) { "Current password is incorrect" }
-                isFalse(
-                    passwordEncoder.matches(
-                        newPassword,
-                        it.password
-                    )
-                ) { "Current password is the same as the previous password" }
+                isFalse(passwordEncoder.matches(newPassword, it.password)) {
+                    "Current password is the same as the previous password"
+                }
             }
             .flatMap { commandGateway.send(SetUserPasswordCommand(username, passwordEncoder.encode(newPassword))) }
 }

@@ -28,7 +28,9 @@ internal class AuthorityGroupAggregateTest {
 
         fixture
             .`when`(CreateAuthorityGroupCommand(groupId, groupName, authorities))
-            .expectEvents(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
+            .expectEvents(
+                AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false)
+            )
     }
 
     @Test
@@ -62,11 +64,12 @@ internal class AuthorityGroupAggregateTest {
     @Test
     internal fun `should update authority group`() {
         val authorities = setOf(Authorities.USERS_CREATE, Authorities.USERS_READ_ALL)
+        val authoritiesUpdate = authorities.plus(Authorities.GROUPS_DELETE)
 
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
-            .`when`(UpdateAuthorityGroupCommand(groupId, "Other name", authorities.plus(Authorities.GROUPS_DELETE)))
-            .expectEvents(AuthorityGroupUpdatedEvent(groupId, "Other name", authorities.plus(Authorities.GROUPS_DELETE)))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, "Other name", authoritiesUpdate, default = true))
+            .expectEvents(AuthorityGroupUpdatedEvent(groupId, "Other name", authoritiesUpdate, default = true))
     }
 
     @Test
@@ -75,34 +78,36 @@ internal class AuthorityGroupAggregateTest {
 
         // Blank group name
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
-            .`when`(UpdateAuthorityGroupCommand(groupId, "", authorities))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, "", authorities, default = false))
             .expectExceptionMessage("Group name should not be blank")
 
 
         // Nothing changed
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
-            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, authorities))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, authorities, default = false))
             .expectExceptionMessage("No properties were updated")
 
 
         // Empty authorities
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
-            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, emptySet()))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, emptySet(), default = false))
             .expectExceptionMessage("Group authorities may not be empty")
 
         // Blank authorities (in set)
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
-            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, setOf(Authorities.USERS_READ_ALL, "")))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, setOf(Authorities.USERS_READ_ALL, ""), false))
             .expectExceptionMessage("Group authorities may not contain empty values")
 
         // Invalid authorities (in set)
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
-            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, setOf(Authorities.USERS_READ_ALL, "ROLE_UNKNOWN")))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
+            .`when`(
+                UpdateAuthorityGroupCommand(groupId, groupName, setOf("ROLE_UNKNOWN"), false)
+            )
             .expectExceptionMessage("Unknown entry found in authorities")
     }
 
@@ -111,9 +116,9 @@ internal class AuthorityGroupAggregateTest {
         val authorities = setOf(Authorities.USERS_CREATE, Authorities.USERS_READ_ALL)
 
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, true))
-            .`when`(UpdateAuthorityGroupCommand(groupId, "Other name", authorities))
-            .expectEvents(AuthorityGroupUpdatedEvent(groupId, "Other name", authorities))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = true, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, "Other name", authorities, false))
+            .expectEvents(AuthorityGroupUpdatedEvent(groupId, "Other name", authorities, false))
     }
 
     @Test
@@ -121,8 +126,8 @@ internal class AuthorityGroupAggregateTest {
         val authorities = setOf(Authorities.USERS_CREATE, Authorities.USERS_READ_ALL)
 
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, true))
-            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, setOf(Authorities.USERS_READ_ALL)))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = true, default = false))
+            .`when`(UpdateAuthorityGroupCommand(groupId, groupName, setOf(Authorities.USERS_READ_ALL), false))
             .expectExceptionMessage("Authority group $groupName is protected and may not have its authorities updated")
     }
 
@@ -131,7 +136,7 @@ internal class AuthorityGroupAggregateTest {
         val authorities = setOf(Authorities.USERS_CREATE, Authorities.USERS_READ_ALL)
 
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, false))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = false, default = false))
             .`when`(DeleteAuthorityGroupCommand(groupId))
             .expectEvents(AuthorityGroupDeletedEvent(groupId))
             .expectMarkedDeleted()
@@ -142,7 +147,17 @@ internal class AuthorityGroupAggregateTest {
         val authorities = setOf(Authorities.USERS_CREATE, Authorities.USERS_READ_ALL)
 
         fixture
-            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, true))
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = true, default = false))
+            .`when`(DeleteAuthorityGroupCommand(groupId))
+            .expectExceptionMessage("Authority group $groupName is protected and can not be deleted")
+    }
+
+    @Test
+    internal fun `should protect default authority group from deletion`() {
+        val authorities = setOf(Authorities.USERS_CREATE, Authorities.USERS_READ_ALL)
+
+        fixture
+            .given(AuthorityGroupCreatedEvent(groupId, groupName, authorities, protected = true, default = true))
             .`when`(DeleteAuthorityGroupCommand(groupId))
             .expectExceptionMessage("Authority group $groupName is protected and can not be deleted")
     }

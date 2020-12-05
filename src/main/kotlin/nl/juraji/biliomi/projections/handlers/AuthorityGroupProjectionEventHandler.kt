@@ -21,7 +21,9 @@ class AuthorityGroupProjectionEventHandler(
         val entity = AuthorityGroupProjection(
             groupId = e.groupId,
             groupName = e.groupName,
-            authorities = e.authorities
+            authorities = e.authorities,
+            protected = e.protected,
+            default = e.default
         )
 
         authorityGroupRepository

@@ -1,9 +1,9 @@
 package nl.juraji.biliomi.api.users
 
 import nl.juraji.biliomi.configuration.security.Authorities
-import nl.juraji.biliomi.domain.user.commands.UpdateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.CreateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.DeleteAuthorityGroupCommand
+import nl.juraji.biliomi.domain.user.commands.UpdateAuthorityGroupCommand
 import nl.juraji.biliomi.projections.AuthorityGroupProjection
 import nl.juraji.biliomi.projections.repositories.AuthorityGroupProjectionRepository
 import nl.juraji.biliomi.utils.extensions.uuid
@@ -48,7 +48,6 @@ class AuthorityGroupsService(
                 )
             }
 
-    // TODO: Split up since commands may only be sent on actual changes (validation)
     fun updateAuthorityGroup(update: AuthorityGroupProjection): Mono<Unit> = authorityGroupRepository
         .findById(update.groupId)
         .validateAsync {
@@ -61,7 +60,8 @@ class AuthorityGroupsService(
                 UpdateAuthorityGroupCommand(
                     groupId = it.groupId,
                     groupName = update.groupName,
-                    authorities = update.authorities
+                    authorities = update.authorities,
+                    default = update.default
                 )
             )
         }

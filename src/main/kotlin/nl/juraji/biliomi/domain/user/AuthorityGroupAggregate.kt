@@ -21,6 +21,7 @@ class AuthorityGroupAggregate() {
     private lateinit var groupId: String
     private lateinit var groupName: String
     private var protected: Boolean = false
+    private var default: Boolean = false
     private var authorities: Set<String> = emptySet()
 
     @CommandHandler
@@ -39,6 +40,7 @@ class AuthorityGroupAggregate() {
                 groupName = cmd.groupName,
                 authorities = cmd.authorities,
                 protected = cmd.protected,
+                default = cmd.default
             )
         )
     }
@@ -47,7 +49,11 @@ class AuthorityGroupAggregate() {
     fun handle(cmd: UpdateAuthorityGroupCommand) {
         validate {
             isNotBlank(cmd.groupName) { "Group name should not be blank" }
-            isFalse(cmd.groupName == groupName && cmd.authorities == authorities) { "No properties were updated" }
+            isFalse(
+                cmd.groupName == groupName
+                        && cmd.authorities == authorities
+                        && cmd.default == default
+            ) { "No properties were updated" }
 
             unless(cmd.authorities == authorities) {
                 isFalse(protected) { "Authority group $groupName is protected and may not have its authorities updated" }
@@ -61,7 +67,8 @@ class AuthorityGroupAggregate() {
             AuthorityGroupUpdatedEvent(
                 groupId = groupId,
                 groupName = cmd.groupName,
-                authorities = cmd.authorities
+                authorities = cmd.authorities,
+                default = cmd.default
             )
         )
     }
@@ -70,6 +77,7 @@ class AuthorityGroupAggregate() {
     fun handle(cmd: DeleteAuthorityGroupCommand) {
         validate {
             isFalse(protected) { "Authority group $groupName is protected and can not be deleted" }
+            isFalse(default) {"Authority group $groupName is set as default and can not be deleted"}
         }
 
         AggregateLifecycle.apply(
@@ -84,6 +92,7 @@ class AuthorityGroupAggregate() {
         this.groupId = e.groupId
         this.groupName = e.groupName
         this.protected = e.protected
+        this.default = e.default
         this.authorities = e.authorities
     }
 
@@ -91,6 +100,7 @@ class AuthorityGroupAggregate() {
     fun on(e: AuthorityGroupUpdatedEvent) {
         this.groupName = e.groupName
         this.authorities = e.authorities
+        this.default = e.default
     }
 
     @EventSourcingHandler
