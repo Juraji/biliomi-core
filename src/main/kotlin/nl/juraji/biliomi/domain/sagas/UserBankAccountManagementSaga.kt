@@ -35,14 +35,10 @@ class UserBankAccountManagementSaga {
     fun on(e: UserCreatedEvent) {
         logger.info("Bank account for user ${e.username}")
         val accountId = uuid(e.username, ACCOUNT_ID_SUFFIX)
+        val cmd = CreateBankAccountCommand(accountId = accountId, username = e.username)
 
         SagaLifecycle.associateWith(ASSOC_ACCOUNT, accountId)
-        commandGateway.send<Unit>(
-            CreateBankAccountCommand(
-                accountId = accountId,
-                username = e.username
-            )
-        ).block()
+        commandGateway.send<Unit>(cmd).block()
     }
 
     @SagaEventHandler(associationProperty = ASSOC_ACCOUNT)

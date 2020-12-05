@@ -37,6 +37,7 @@ class AddUserToDefaultAuthorityGroupsSaga {
         val defaultGroups = authorityGroupRepository.findByDefaultIsTrue()
 
         if (defaultGroups.isEmpty()) {
+            logger.debug("User ${e.username} created, by no default groups found, ending sagas")
             SagaLifecycle.end()
         } else {
             defaultGroups.forEach { SagaAssociations.associateWith(ASSOC_GROUP, it.groupId) }

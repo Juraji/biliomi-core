@@ -60,17 +60,15 @@ class BankAccountInterestSaga {
 
     @DeadlineHandler(deadlineName = INTEREST_DEADLINE)
     fun onInterestDeadline() {
-        val accountId = SagaAssociations.getAssociatedValueNonNull(ASSOC_ACCOUNT)
-
-        commandGateway.send<Unit>(
-            AddBankAccountBalanceCommand(
-                accountId = accountId,
-                amount = configuration.interestAmount,
-                message = INTEREST_MESSAGE
-            )
-        ).block()
-
         deadlineManager.cancelAllWithinScope(INTEREST_DEADLINE)
+        val accountId = SagaAssociations.getAssociatedValueNonNull(ASSOC_ACCOUNT)
+        val cmd = AddBankAccountBalanceCommand(
+            accountId = accountId,
+            amount = configuration.interestAmount,
+            message = INTEREST_MESSAGE
+        )
+
+        commandGateway.send<Unit>(cmd).block()
         deadlineManager.schedule(
             configuration.interestRateDuration,
             INTEREST_DEADLINE
