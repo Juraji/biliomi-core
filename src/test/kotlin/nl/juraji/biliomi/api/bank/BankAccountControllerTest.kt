@@ -52,7 +52,7 @@ internal class BankAccountControllerTest {
         val result = webTestClient
             .mutateWith(csrf())
             .get()
-            .uri("/account/me")
+            .uri("/bank/me")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk

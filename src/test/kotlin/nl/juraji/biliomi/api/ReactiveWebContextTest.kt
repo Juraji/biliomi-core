@@ -2,6 +2,9 @@ package nl.juraji.biliomi.api
 
 import nl.juraji.biliomi.utils.withWebContext
 import org.junit.jupiter.api.Test
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
+import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.userdetails.User
 import reactor.test.StepVerifier
 
 internal class ReactiveWebContextTest {
@@ -30,5 +33,28 @@ internal class ReactiveWebContextTest {
     fun `should return empty mono when ServerWebExchange not present`() {
         StepVerifier.create(ReactiveWebContext.getServerWebExchange())
             .verifyComplete()
+    }
+
+    @Test
+    internal fun `should return current user`() {
+        StepVerifier.create(withWebContext(
+            authentication = TestingAuthenticationToken(
+                User.builder()
+                    .username("User")
+                    .password("")
+                    .authorities("ROLE_X")
+                    .build(),
+                null
+            )
+        ) { ReactiveWebContext.getCurrentUser() })
+            .expectNextCount(1)
+            .verifyComplete()
+    }
+
+    @Test
+    internal fun `should fail when no current user is set`() {
+        StepVerifier.create(ReactiveWebContext.getCurrentUser())
+            .expectError(AuthenticationCredentialsNotFoundException::class.java)
+            .verify()
     }
 }

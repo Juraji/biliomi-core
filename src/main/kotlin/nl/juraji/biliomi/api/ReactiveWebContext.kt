@@ -1,12 +1,11 @@
 package nl.juraji.biliomi.api
 
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
-import reactor.kotlin.core.publisher.toMono
 
 object ReactiveWebContext {
 
@@ -22,13 +21,6 @@ object ReactiveWebContext {
 
     fun getCurrentUser(): Mono<UserDetails> = getSecurityContext()
         .map { it.authentication.principal as UserDetails }
-        .switchIfEmpty {
-            User
-                .withUsername("SYSTEM")
-                .password("")
-                .authorities(emptyList())
-                .build()
-                .toMono()
-        }
+        .switchIfEmpty { Mono.error { AuthenticationCredentialsNotFoundException("Cannot get current user") }}
 
 }
