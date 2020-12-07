@@ -7,7 +7,7 @@ import nl.juraji.biliomi.configuration.aggregate.BankAccountAggregateConfigurati
 import nl.juraji.biliomi.domain.bankaccount.commands.AddBankAccountBalanceCommand
 import nl.juraji.biliomi.domain.bankaccount.events.InterestEndedEvent
 import nl.juraji.biliomi.domain.bankaccount.events.InterestStartedEvent
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV4
 import nl.juraji.biliomi.utils.returnsEmptyMono
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.axonframework.test.saga.SagaTestFixture
@@ -19,7 +19,7 @@ import java.time.Duration
 @ExtendWith(MockKExtension::class)
 internal class BankAccountInterestSagaTest {
     private lateinit var fixture: SagaTestFixture<BankAccountInterestSaga>
-    private val accountId = uuid()
+    private val accountId = uuidV4()
 
     @MockK
     private lateinit var commandGateway: ReactorCommandGateway

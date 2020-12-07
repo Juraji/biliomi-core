@@ -5,7 +5,7 @@ import nl.juraji.biliomi.domain.user.commands.AddUserToAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.CreateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.CreateUserCommand
 import nl.juraji.biliomi.utils.LoggerCompanion
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV4
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.ContextRefreshedEvent
@@ -65,7 +65,7 @@ class InstallService(
         commandGateway
             .send<String>(
                 CreateAuthorityGroupCommand(
-                    groupId = uuid(),
+                    groupId = uuidV4(),
                     groupName = usersGroupName,
                     authorities = usersGroupAuthorities,
                     default = true
@@ -81,7 +81,7 @@ class InstallService(
         val adminDisplayName = "Administrator"
 
         val createAdminGroupCmd = CreateAuthorityGroupCommand(
-            groupId = uuid(),
+            groupId = uuidV4(),
             groupName = adminGroupName,
             authorities = Authorities.all.toSet(),
             protected = true

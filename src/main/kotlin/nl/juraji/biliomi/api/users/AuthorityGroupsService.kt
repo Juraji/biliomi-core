@@ -6,7 +6,7 @@ import nl.juraji.biliomi.domain.user.commands.DeleteAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.commands.UpdateAuthorityGroupCommand
 import nl.juraji.biliomi.projections.AuthorityGroupProjection
 import nl.juraji.biliomi.projections.repositories.AuthorityGroupProjectionRepository
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV4
 import nl.juraji.reactor.validations.validateAsync
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.springframework.security.core.GrantedAuthority
@@ -27,7 +27,7 @@ class AuthorityGroupsService(
             .flatMap {
                 commandGateway.send(
                     CreateAuthorityGroupCommand(
-                        groupId = uuid(),
+                        groupId = uuidV4(),
                         groupName = groupName,
                         authorities = authorities
                     )
@@ -41,7 +41,7 @@ class AuthorityGroupsService(
             .flatMap {
                 commandGateway.send(
                     CreateAuthorityGroupCommand(
-                        groupId = uuid(),
+                        groupId = uuidV4(),
                         groupName = name,
                         authorities = it.authorities
                     )

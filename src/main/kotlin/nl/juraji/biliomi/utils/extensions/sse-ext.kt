@@ -14,7 +14,7 @@ fun <T : Any> Flux<T>.toServerSentEvents(
     val sourceStream: ServerSentEventFlux<T> = this.map {
         ServerSentEvent
             .builder(it)
-            .id(uuid())
+            .id(uuidV4())
             .build()
     }
 

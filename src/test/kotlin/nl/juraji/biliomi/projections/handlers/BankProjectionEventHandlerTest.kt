@@ -12,7 +12,7 @@ import nl.juraji.biliomi.domain.bankaccount.events.BankAccountCreatedEvent
 import nl.juraji.biliomi.domain.bankaccount.events.BankAccountDeletedEvent
 import nl.juraji.biliomi.projections.BankProjection
 import nl.juraji.biliomi.projections.repositories.BankProjectionRepository
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV4
 import nl.juraji.biliomi.utils.returnsEmptyMono
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MockKExtension::class)
 internal class BankProjectionEventHandlerTest {
 
-    private val accountId = uuid()
+    private val accountId = uuidV4()
     private val username = "mock-user"
 
     @MockK

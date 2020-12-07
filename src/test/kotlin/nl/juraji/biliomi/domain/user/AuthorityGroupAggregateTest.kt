@@ -7,14 +7,14 @@ import nl.juraji.biliomi.domain.user.commands.UpdateAuthorityGroupCommand
 import nl.juraji.biliomi.domain.user.events.AuthorityGroupCreatedEvent
 import nl.juraji.biliomi.domain.user.events.AuthorityGroupDeletedEvent
 import nl.juraji.biliomi.domain.user.events.AuthorityGroupUpdatedEvent
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV4
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class AuthorityGroupAggregateTest {
     private lateinit var fixture: AggregateTestFixture<AuthorityGroupAggregate>
-    private val groupId = uuid()
+    private val groupId = uuidV4()
     private val groupName = "group#1"
 
     @BeforeEach

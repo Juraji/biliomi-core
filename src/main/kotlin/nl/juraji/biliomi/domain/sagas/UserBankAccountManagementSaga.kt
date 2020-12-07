@@ -9,7 +9,7 @@ import nl.juraji.biliomi.domain.user.events.UserCreatedEvent
 import nl.juraji.biliomi.domain.user.events.UserDeletedEvent
 import nl.juraji.biliomi.utils.LoggerCompanion
 import nl.juraji.biliomi.utils.SagaAssociations
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV3
 import org.axonframework.config.ProcessingGroup
 import org.axonframework.extensions.reactor.commandhandling.gateway.ReactorCommandGateway
 import org.axonframework.modelling.saga.EndSaga
@@ -33,8 +33,7 @@ class UserBankAccountManagementSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = ASSOC_USER)
     fun on(e: UserCreatedEvent) {
-        logger.info("Bank account for user ${e.username}")
-        val accountId = uuid(e.username, ACCOUNT_ID_SUFFIX)
+        val accountId = uuidV3(UUID_ACCOUNTS_NS, e.username)
         val cmd = CreateBankAccountCommand(accountId = accountId, username = e.username)
 
         SagaLifecycle.associateWith(ASSOC_ACCOUNT, accountId)
@@ -60,7 +59,7 @@ class UserBankAccountManagementSaga {
     }
 
     companion object : LoggerCompanion(UserBankAccountManagementSaga::class) {
-        const val ACCOUNT_ID_SUFFIX = "bank-account"
+        const val UUID_ACCOUNTS_NS = "bank-account"
         const val ASSOC_ACCOUNT = "accountId"
         const val ASSOC_USER = "username"
     }

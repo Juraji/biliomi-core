@@ -7,7 +7,7 @@ import nl.juraji.biliomi.domain.bankaccount.commands.TakeBankAccountBalanceComma
 import nl.juraji.biliomi.domain.bankaccount.events.BankAccountBalanceUpdatedEvent
 import nl.juraji.biliomi.domain.bankaccount.events.BankAccountCreatedEvent
 import nl.juraji.biliomi.domain.bankaccount.events.BankAccountDeletedEvent
-import nl.juraji.biliomi.utils.extensions.uuid
+import nl.juraji.biliomi.utils.extensions.uuidV4
 import nl.juraji.reactor.validations.ValidationException
 import org.axonframework.test.aggregate.AggregateTestFixture
 import org.junit.jupiter.api.BeforeEach
@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test
 
 internal class BankAccountAggregateTest {
     private lateinit var fixture: AggregateTestFixture<BankAccountAggregate>
-    private val accountId = uuid()
-    private val username = uuid()
+    private val accountId = uuidV4()
+    private val username = uuidV4()
 
     @BeforeEach
     fun setUp() {
