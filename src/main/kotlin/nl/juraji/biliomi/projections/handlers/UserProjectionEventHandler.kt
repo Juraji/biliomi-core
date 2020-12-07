@@ -63,7 +63,7 @@ class UserProjectionEventHandler(
     fun on(e: UserRemovedFromAuthorityGroupEvent) {
         userProjectionRepository
             .update(e.username) {
-                copy(authorityGroups = authorityGroups.filter { it.groupId == e.groupId }.toSet())
+                copy(authorityGroups = authorityGroups.filter { it.groupId != e.groupId }.toSet())
             }
             .block()
     }

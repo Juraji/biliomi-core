@@ -34,22 +34,22 @@ class AuthorityGroupsService(
                 )
             }
 
-    fun copyAuthorityGroup(sourceGroupId: String, newGroupName: String): Mono<String> =
+    fun copyAuthorityGroup(groupId: String, name: String): Mono<String> =
         authorityGroupRepository
-            .findById(sourceGroupId)
-            .validateAsync { isFalse(authorityGroupRepository.existsByName(newGroupName)) { "A group with name $newGroupName already exists" } }
+            .findById(groupId)
+            .validateAsync { isFalse(authorityGroupRepository.existsByName(name)) { "A group with name $name already exists" } }
             .flatMap {
                 commandGateway.send(
                     CreateAuthorityGroupCommand(
                         groupId = uuid(),
-                        groupName = newGroupName,
+                        groupName = name,
                         authorities = it.authorities
                     )
                 )
             }
 
-    fun updateAuthorityGroup(update: AuthorityGroupProjection): Mono<Unit> = authorityGroupRepository
-        .findById(update.groupId)
+    fun updateAuthorityGroup(groupId: String, update: AuthorityGroupProjection): Mono<Unit> = authorityGroupRepository
+        .findById(groupId)
         .validateAsync {
             unless(it.groupName == update.groupName) {
                 isFalse(authorityGroupRepository.existsByName(update.groupName)) { "A group with name ${update.groupName} already exists" }

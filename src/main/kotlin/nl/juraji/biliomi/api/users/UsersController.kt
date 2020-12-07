@@ -49,9 +49,11 @@ class UsersController(
     @PostMapping
     @PreAuthorize("hasRole('${Authorities.USERS_CREATE}')")
     fun createUser(
-        @RequestBody userDto: CreateUserDto,
+        @RequestParam("username") username: String,
+        @RequestParam("displayName", required = false) displayName: String?,
+        @RequestParam("password", required = false) password: String?,
     ): Mono<UserCreatedDTO> = usersService
-        .createUser(userDto.username, userDto.displayName, userDto.password)
+        .createUser(username, displayName, password)
         .map { UserCreatedDTO(it) }
 
     @DeleteMapping("/{username}")
@@ -67,10 +69,10 @@ class UsersController(
         @RequestParam("groupId") groupId: String
     ): Mono<Unit> = usersService.addGroupToUser(username, groupId)
 
-    @DeleteMapping("/{username}/groups/{groupId}")
+    @DeleteMapping("/{username}/groups")
     @PreAuthorize("hasRole('${Authorities.USERS_REMOVE_GROUP}')")
     fun removeGroupFromUser(
         @PathVariable("username") username: String,
-        @PathVariable("groupId") groupId: String,
+        @RequestParam("groupId") groupId: String,
     ): Mono<Unit> = usersService.removeGroupFromUser(username, groupId)
 }

@@ -21,34 +21,33 @@ class AuthorityGroupsController(
     @PostMapping
     @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
     fun createAuthorityGroup(
-        @RequestBody createAuthorityGroupDto: CreateAuthorityGroupDto,
+        @RequestParam("name") name: String,
+        @RequestParam("authorities") authorities: Set<String>,
     ): Mono<AuthorityGroupCreatedDTO> = authorityGroupsService
-        .createAuthorityGroup(
-            groupName = createAuthorityGroupDto.groupName,
-            authorities = createAuthorityGroupDto.authorities,
-        )
+        .createAuthorityGroup(name, authorities)
         .map { AuthorityGroupCreatedDTO(it) }
 
-    @PostMapping("/copy")
+    @PostMapping("/{groupId}/copy")
     @PreAuthorize("hasRole('${Authorities.GROUPS_CREATE}')")
     fun copyAuthorityGroup(
-        @RequestParam("sourceGroupId") sourceGroupId: String,
-        @RequestParam("newGroupName") newGroupName: String
+        @PathVariable("groupId") groupId: String,
+        @RequestParam("name") name: String
     ): Mono<AuthorityGroupCreatedDTO> = authorityGroupsService
-        .copyAuthorityGroup(sourceGroupId, newGroupName)
+        .copyAuthorityGroup(groupId, name)
         .map { AuthorityGroupCreatedDTO(it) }
 
-    @PutMapping
+    @PutMapping("/{groupId}")
     @PreAuthorize("hasRole('${Authorities.GROUPS_UPDATE}')")
     fun updateAuthorityGroup(
+        @PathVariable("groupId") groupId: String,
         @RequestBody authorityGroup: AuthorityGroupProjection,
-    ): Mono<Unit> = authorityGroupsService.updateAuthorityGroup(authorityGroup)
+    ): Mono<Unit> = authorityGroupsService.updateAuthorityGroup(groupId, authorityGroup)
 
     @PreAuthorize("hasRole('${Authorities.GROUPS_DELETE}')")
-    @DeleteMapping("/{authorityGroupId}")
+    @DeleteMapping("/{groupId}")
     fun deleteAuthorityGroup(
-        @PathVariable("authorityGroupId") authorityGroupId: String
-    ): Mono<Unit> = authorityGroupsService.deleteAuthorityGroup(authorityGroupId)
+        @PathVariable("groupId") groupId: String
+    ): Mono<Unit> = authorityGroupsService.deleteAuthorityGroup(groupId)
 
     @GetMapping("/permission-list")
     fun getPermissionList(): Flux<GrantedAuthority> = authorityGroupsService.getPermissionList()

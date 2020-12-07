@@ -18,6 +18,11 @@ class BankAccountService(
 ) {
     fun getAccountByUsername(username: String): Mono<BankProjection> = bankProjectionRepository.findByUsername(username)
     fun getAllAccounts(): Flux<BankProjection> = bankProjectionRepository.findAll()
+
+    fun mutatePoints(accountId: String, amount: Long, message: String?): Mono<Unit> =
+        if (amount > 0) addPoints(accountId, amount, message)
+        else takePoints(accountId, amount, message)
+
     fun addPoints(accountId: String, amount: Long, message: String?): Mono<Unit> =
         reactorCommandGateway.send(AddBankAccountBalanceCommand(accountId, amount, message))
 

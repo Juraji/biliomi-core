@@ -31,21 +31,13 @@ class BankAccountController(
     @PreAuthorize("hasRole('${Authorities.BANK_READ_ALL}')")
     fun getAllAccounts(): Flux<BankProjection> = bankAccountService.getAllAccounts()
 
-    @PostMapping("/{accountId}/points/add")
-    @PreAuthorize("hasRole('${Authorities.BANK_ADD_POINTS}')")
+    @PostMapping("/{accountId}/points/mutate")
+    @PreAuthorize("hasRole('${Authorities.BANK_MUTATE_POINTS}')")
     fun addPoints(
         @PathVariable("accountId") accountId: String,
         @RequestParam("amount") amount: Long,
         @RequestParam("message", required = false) message: String?,
-    ): Mono<Unit> = bankAccountService.addPoints(accountId, amount, message)
-
-    @PostMapping("/{accountId}/points/take")
-    @PreAuthorize("hasRole('${Authorities.BANK_TAKE_POINTS}')")
-    fun takePoints(
-        @PathVariable("accountId") accountId: String,
-        @RequestParam("amount") amount: Long,
-        @RequestParam("message", required = false) message: String?,
-    ): Mono<Unit> = bankAccountService.takePoints(accountId, amount, message)
+    ): Mono<Unit> = bankAccountService.mutatePoints(accountId, amount, message)
 
     @PostMapping("/{accountId}/interest/start")
     @PreAuthorize("hasRole('${Authorities.BANK_START_STOP_INTEREST}')")
