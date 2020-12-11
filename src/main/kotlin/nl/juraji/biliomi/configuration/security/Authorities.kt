@@ -5,6 +5,7 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.starProjectedType
 
 object Authorities {
+    const val SYSTEM_ADMIN = "ROLE_SYSTEM_ADMIN"
     const val GROUPS_READ_ALL = "ROLE_GROUPS_READ_ALL"
     const val GROUPS_CREATE = "ROLE_GROUPS_CREATE"
     const val GROUPS_UPDATE = "ROLE_GROUPS_UPDATE"

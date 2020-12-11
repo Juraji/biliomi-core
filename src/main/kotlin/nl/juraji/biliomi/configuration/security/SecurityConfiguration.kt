@@ -36,7 +36,7 @@ class SecurityConfiguration {
     ): SecurityWebFilterChain = http
         .csrf().disable()
         .authorizeExchange()
-        .pathMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
+        .pathMatchers("/actuator/**").hasAuthority(Authorities.SYSTEM_ADMIN)
         .anyExchange().authenticated()
         .and().httpBasic()
         .and().build()
